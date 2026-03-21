@@ -1,0 +1,26 @@
+# Secrets
+.env
+gamma-ai-project-abe04ab418c3.json
+
+# Python cache/venv
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# IDE/system
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Test/build/cache
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Runtime generated
+uploads/
+static/generated/

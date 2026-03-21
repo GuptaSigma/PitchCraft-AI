@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="p-8 bg-gray-100">
+    <h1 class="text-2xl font-bold mb-8">Export Dropdown Test</h1>
+    
+    <!-- Test Dropdown -->
+    <div class="relative inline-block">
+        <button id="export-btn" 
+                onclick="toggleDropdown()"
+                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold flex items-center gap-2 shadow-lg">
+            <i class="ph-bold ph-download-simple"></i>
+            Export
+            <i class="ph-bold ph-caret-down"></i>
+        </button>
+        
+           <div id="export-dropdown" 
+               class="hidden absolute right-0 mt-2 z-[9999] min-w-[14rem] bg-white rounded-xl shadow-xl border-2 border-slate-200">
+              <div class="p-1">
+                <button onclick="selectFormat('pptx')" 
+                        class="w-full text-left px-4 py-3 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-3 transition-colors border-b border-slate-100 rounded-t-lg">
+                    <i class="ph-fill ph-file-ppt text-orange-500 text-2xl"></i>
+                    <div>
+                        <div class="font-bold text-slate-800">PowerPoint</div>
+                        <div class="text-xs text-slate-500">.pptx format</div>
+                    </div>
+                </button>
+                <button onclick="selectFormat('pdf')" 
+                        class="w-full text-left px-4 py-3 hover:bg-red-50 hover:text-red-600 flex items-center gap-3 transition-colors border-b border-slate-100">
+                    <i class="ph-fill ph-file-pdf text-red-600 text-2xl"></i>
+                    <div>
+                        <div class="font-bold text-slate-800">PDF</div>
+                        <div class="text-xs text-slate-500">.pdf format</div>
+                    </div>
+                </button>
+                <button onclick="selectFormat('docx')" 
+                        class="w-full text-left px-4 py-3 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3 transition-colors border-b border-slate-100">
+                    <i class="ph-fill ph-file-doc text-blue-600 text-2xl"></i>
+                    <div>
+                        <div class="font-bold text-slate-800">Word DOCX</div>
+                        <div class="text-xs text-slate-500">.docx format</div>
+                    </div>
+                </button>
+                <button onclick="selectFormat('doc')" 
+                        class="w-full text-left px-4 py-3 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors rounded-b-lg">
+                    <i class="ph-fill ph-file-text text-blue-500 text-2xl"></i>
+                    <div>
+                        <div class="font-bold text-slate-800">Word DOC</div>
+                        <div class="text-xs text-slate-500">.doc format</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-8 p-4 bg-white rounded-lg shadow">
+        <h2 class="font-bold mb-2">Console Output:</h2>
+        <div id="console" class="text-sm font-mono bg-gray-900 text-green-400 p-3 rounded"></div>
+    </div>
+
+    <script>
+        function log(msg) {
+            const consoleEl = document.getElementById('console');
+            consoleEl.innerHTML += msg + '<br>';
+            console.log(msg);
+        }
+        
+        function toggleDropdown() {
+            const dropdown = document.getElementById('export-dropdown');
+            const isHidden = dropdown.classList.contains('hidden');
+
+            log('🔽 Toggle clicked! Hidden: ' + isHidden);
+
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                log('✅ Dropdown shown');
+            } else {
+                dropdown.classList.add('hidden');
+                log('❌ Dropdown hidden');
+            }
+        }
+        
+        function selectFormat(format) {
+            log('📥 Selected format: ' + format.toUpperCase());
+            document.getElementById('export-dropdown').classList.add('hidden');
+        }
+        
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('export-dropdown');
+            const exportBtn = document.getElementById('export-btn');
+            if (!exportBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+                log('🚪 Closed by outside click');
+            }
+        });
+        
+        log('✨ Test page loaded');
+    </script>
+</body>
+</html>

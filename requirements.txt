@@ -1,0 +1,17 @@
+Flask==3.0.0
+Flask-CORS==4.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-JWT-Extended==4.6.0
+Flask-Bcrypt==1.0.1
+pymysql==1.1.0
+mysql-connector-python==8.2.0
+psycopg2-binary==2.9.9
+reportlab==4.0.7
+python-docx==1.1.0
+python-pptx==0.6.23
+Pillow==10.1.0
+python-dotenv==1.0.0
+requests==2.31.0
+google-cloud-storage==2.10.0
+google-auth==2.23.0
+PyJWT==2.10.1

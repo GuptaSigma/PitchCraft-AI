@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PitchCraft AI | Next-Gen Presentation Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#1e3a8a',
+                            glow: '#8b5cf6'
+                        },
+                        dark: {
+                            900: '#030712',
+                            800: '#111827',
+                            700: '#1f2937'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out 3s infinite',
+                        'spotlight': 'spotlight 2s ease .5s 1 forwards',
+                        'glow-pulse': 'glowPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        glowPulse: {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: .5 },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            background-color: #030712;
+            color: #f9fafb;
+            overflow-x: hidden;
+        }
+
+        .bg-grid-pattern {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, transparent, black, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black, transparent);
+        }
+
+        .text-gradient-hero {
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .bento-card {
+            background: rgba(31, 41, 55, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bento-card:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(139, 92, 246, 0.15);
+        }
+
+        .glow-button {
+            position: relative;
+        }
+        
+        .glow-button::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 9999px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glow-button:hover::before {
+            opacity: 0.8;
+            animation: glowPulse 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white">
+
+    <div class="fixed inset-0 bg-grid-pattern z-[-1] opacity-40"></div>
+    
+    <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-brand-600/20 blur-[120px] pointer-events-none z-[-1]"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/20 blur-[120px] pointer-events-none z-[-1]"></div>
+
+    <nav class="fixed w-full z-50 bg-dark-900/50 backdrop-blur-xl border-b border-white/5 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-3 cursor-pointer group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-black shadow-[0_0_15px_rgba(139,92,246,0.5)] group-hover:shadow-[0_0_25px_rgba(139,92,246,0.8)] transition-all">
+                        P
+                    </div>
+                    <span class="font-display font-black text-2xl tracking-tight text-white">PitchCraft AI</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 items-center font-medium text-slate-300">
+                    <a href="#features" class="hover:text-white transition">Features</a>
+                    <a href="#workflow" class="hover:text-white transition">Workflow</a>
+                    <a href="#export" class="hover:text-white transition">Export</a>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <a href="/login" class="hidden md:block font-semibold text-slate-300 hover:text-white transition">Sign in</a>
+                    <a href="/signup" class="glow-button px-6 py-2.5 bg-white text-dark-900 rounded-full font-bold hover:scale-105 active:scale-95 transition-all">
+                        Start Free
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative pt-40 pb-20 lg:pt-52 lg:pb-32 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 hover:bg-white/10 transition cursor-pointer">
+                <span class="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+                <span class="text-sm font-semibold text-slate-300 tracking-wide">Gemini 3.0 & ChatGPT 5.3 Active</span>
+            </div>
+            
+            <h1 class="text-6xl md:text-8xl font-display font-black tracking-tighter leading-[1.1] mb-6">
+                Presentations that <br class="hidden md:block" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">design themselves.</span>
+            </h1>
+            
+            <p class="mt-6 text-xl text-slate-400 max-w-2xl mx-auto font-medium mb-12 leading-relaxed">
+                Feed your ideas. PitchCraft AI structures the narrative, sources 100% real images, and maps content to 8 stunning layouts in seconds.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-5">
+                <a href="/signup" class="glow-button px-8 py-4 bg-white text-dark-900 rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:scale-105 transition-transform z-10">
+                    <i class="ph-bold ph-magic-wand text-xl"></i> Craft Your Pitch
+                </a>
+                <a href="#workflow" class="px-8 py-4 bg-white/5 text-white border border-white/10 rounded-2xl font-bold text-lg hover:bg-white/10 transition transform hover:scale-105 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-play text-xl"></i> See it in action
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-24 max-w-5xl mx-auto px-4 relative z-20 perspective-1000">
+            <div class="rounded-[2rem] p-2 bg-gradient-to-b from-white/10 to-transparent border border-white/10 shadow-2xl backdrop-blur-sm transform rotate-x-12 animate-float">
+                <div class="rounded-[1.5rem] overflow-hidden bg-dark-800 border border-white/5 relative">
+                    <div class="bg-dark-900 px-4 py-4 flex items-center gap-2 border-b border-white/5">
+                        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                        <div class="mx-auto text-xs text-slate-500 font-mono">editor.pitchcraft.ai</div>
+                    </div>
+                    <div class="h-[400px] flex items-center justify-center relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center">
+                        <div class="absolute inset-0 bg-dark-900/80 backdrop-blur-sm flex flex-col items-center justify-center">
+                            <i class="ph-duotone ph-sparkle text-6xl text-purple-400 mb-4 animate-glow-pulse"></i>
+                            <h3 class="text-2xl font-display font-bold text-white mb-2">Generating Executive Summary...</h3>
+                            <div class="flex gap-2 text-sm text-slate-400 font-mono bg-dark-900/50 px-4 py-2 rounded-full border border-white/10">
+                                <span>Status:</span> <span class="text-green-400">Fetching Real Images</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="features" class="py-32 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-16">
+                <h2 class="text-4xl md:text-5xl font-display font-black text-white mb-4">Engineering <span class="text-purple-400">Brilliance.</span></h2>
+                <p class="text-xl text-slate-400 max-w-2xl">Under the hood, we combine the world's most powerful LLMs with a custom layout engine.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
+                
+                <div class="bento-card md:col-span-2 rounded-[2rem] p-8 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition group-hover:bg-blue-500/20"></div>
+                    <i class="ph-duotone ph-cpu text-4xl text-blue-400 mb-6 block"></i>
+                    <h3 class="text-3xl font-display font-bold text-white mb-3">Dual AI Brain</h3>
+                    <p class="text-slate-400 text-lg max-w-md">Driven by <strong class="text-white">Gemini 3.0</strong> and <strong class="text-white">ChatGPT 5.3</strong>. You can switch models directly while keeping the same presentation workflow.</p>
+                </div>
+
+                <div class="bento-card md:col-span-1 rounded-[2rem] p-8 relative overflow-hidden group flex flex-col justify-end">
+                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <i class="ph-duotone ph-image text-4xl text-green-400 mb-auto"></i>
+                    <h3 class="text-2xl font-display font-bold text-white mb-2">Real Images Only</h3>
+                    <p class="text-slate-400">Zero AI artifacts. We fetch exact, paginated photos from Google & Wikipedia.</p>
+                </div>
+
+                <div class="bento-card md:col-span-1 rounded-[2rem] p-8 relative overflow-hidden group">
+                    <i class="ph-duotone ph-columns text-4xl text-pink-400 mb-6 block"></i>
+                    <h3 class="text-2xl font-display font-bold text-white mb-2">8 Smart Layouts</h3>
+                    <p class="text-slate-400">Roadmaps, Grids, Split-boxes. Content is auto-mapped to the perfect visual structure.</p>
+                </div>
+
+                <div class="bento-card md:col-span-2 rounded-[2rem] p-8 relative overflow-hidden group flex items-center justify-between">
+                    <div class="z-10 max-w-sm">
+                        <i class="ph-duotone ph-export text-4xl text-purple-400 mb-6 block"></i>
+                        <h3 class="text-3xl font-display font-bold text-white mb-3">Universal Export</h3>
+                        <p class="text-slate-400 text-lg">Download your polished deck in one click as a native PowerPoint (.pptx), PDF, or Word document.</p>
+                    </div>
+                    <div class="hidden sm:flex gap-4 opacity-20 group-hover:opacity-100 transition-opacity duration-500 z-10">
+                        <i class="ph-fill ph-file-ppt text-6xl text-orange-500"></i>
+                        <i class="ph-fill ph-file-pdf text-6xl text-red-500"></i>
+                    </div>
+                    <div class="absolute right-0 bottom-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl transition group-hover:bg-purple-500/20"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="workflow" class="py-32 border-t border-white/5 bg-dark-800/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-display font-black text-white">Three steps to a perfect pitch.</h2>
+            </div>
+
+            <div class="relative">
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-purple-500/50 to-transparent -translate-x-1/2"></div>
+
+                <div class="flex flex-col md:flex-row items-center justify-between mb-24 relative">
+                    <div class="md:w-5/12 text-right md:pr-12 mb-8 md:mb-0">
+                        <div class="inline-block px-4 py-1 rounded-full bg-blue-500/10 text-blue-400 font-mono text-sm mb-4 border border-blue-500/20">Step 01</div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-4">Provide the Spark</h3>
+                        <p class="text-slate-400 text-lg">Drop in a single prompt or paste your meticulously crafted custom outline. Our validator processes the input instantly.</p>
+                    </div>
+                    <div class="hidden md:flex absolute left-1/2 w-12 h-12 rounded-full bg-dark-900 border-2 border-blue-500 items-center justify-center -translate-x-1/2 z-10 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                        <i class="ph-bold ph-text-t text-blue-400"></i>
+                    </div>
+                    <div class="md:w-5/12 md:pl-12">
+                        <div class="bento-card p-6 rounded-2xl">
+                            <div class="h-4 w-1/3 bg-white/10 rounded mb-4"></div>
+                            <div class="h-4 w-full bg-white/5 rounded mb-2"></div>
+                            <div class="h-4 w-5/6 bg-white/5 rounded mb-2"></div>
+                            <div class="h-4 w-4/6 bg-white/5 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row-reverse items-center justify-between mb-24 relative">
+                    <div class="md:w-5/12 text-left md:pl-12 mb-8 md:mb-0">
+                        <div class="inline-block px-4 py-1 rounded-full bg-purple-500/10 text-purple-400 font-mono text-sm mb-4 border border-purple-500/20">Step 02</div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-4">AI Orchestration</h3>
+                        <p class="text-slate-400 text-lg">Choose between ChatGPT 5.3 and Gemini 3.0 for slide writing while the engine keeps image selection and layout generation consistent.</p>
+                    </div>
+                    <div class="hidden md:flex absolute left-1/2 w-12 h-12 rounded-full bg-dark-900 border-2 border-purple-500 items-center justify-center -translate-x-1/2 z-10 shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+                        <i class="ph-bold ph-cpu text-purple-400"></i>
+                    </div>
+                    <div class="md:w-5/12 md:pr-12">
+                        <div class="bento-card p-6 rounded-2xl flex gap-4">
+                            <div class="w-1/2 bg-white/5 rounded-xl h-32 flex items-center justify-center">
+                                <i class="ph-duotone ph-image text-4xl text-white/20"></i>
+                            </div>
+                            <div class="w-1/2 flex flex-col gap-3 justify-center">
+                                <div class="h-3 w-full bg-purple-500/40 rounded"></div>
+                                <div class="h-3 w-4/5 bg-white/10 rounded"></div>
+                                <div class="h-3 w-5/6 bg-white/10 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-between relative">
+                    <div class="md:w-5/12 text-right md:pr-12 mb-8 md:mb-0">
+                        <div class="inline-block px-4 py-1 rounded-full bg-pink-500/10 text-pink-400 font-mono text-sm mb-4 border border-pink-500/20">Step 03</div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-4">Export & Conquer</h3>
+                        <p class="text-slate-400 text-lg">Swap between beautifully crafted themes (Wine, Petrol, Midnight) with one click. Then, download your masterpiece.</p>
+                    </div>
+                    <div class="hidden md:flex absolute left-1/2 w-12 h-12 rounded-full bg-dark-900 border-2 border-pink-500 items-center justify-center -translate-x-1/2 z-10 shadow-[0_0_15px_rgba(236,72,153,0.5)]">
+                        <i class="ph-bold ph-download-simple text-pink-400"></i>
+                    </div>
+                    <div class="md:w-5/12 md:pl-12">
+                        <div class="bento-card p-6 rounded-2xl flex items-center justify-center h-32 gap-6">
+                            <i class="ph-fill ph-file-ppt text-5xl text-orange-500 hover:scale-110 transition cursor-pointer"></i>
+                            <i class="ph-fill ph-file-pdf text-5xl text-red-500 hover:scale-110 transition cursor-pointer"></i>
+                            <i class="ph-fill ph-file-doc text-5xl text-blue-500 hover:scale-110 transition cursor-pointer"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="py-32 relative overflow-hidden border-t border-white/5">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-luminosity"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent"></div>
+        
+        <div class="max-w-4xl mx-auto px-4 relative z-10 text-center">
+            <h2 class="text-5xl md:text-7xl font-display font-black text-white mb-6 tracking-tight">Stop formatting. <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Start pitching.</span></h2>
+            <p class="text-xl text-slate-400 mb-12 font-medium">No credit card required. Generate your first premium deck in exactly 30 seconds.</p>
+            <a href="/signup" class="glow-button inline-flex items-center gap-3 px-12 py-6 bg-white text-dark-900 rounded-full font-black text-2xl transition-transform hover:scale-105 active:scale-95">
+                Build My Deck <i class="ph-bold ph-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/10 bg-dark-900 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-black">P</div>
+                    <span class="font-display font-bold text-white text-xl">PitchCraft AI</span>
+                </div>
+                
+                <div class="flex gap-8 text-sm font-medium text-slate-400">
+                    <a href="#" class="hover:text-white transition">Privacy</a>
+                    <a href="#" class="hover:text-white transition">Terms</a>
+                    <a href="#" class="hover:text-white transition">Contact</a>
+                </div>
+                
+                <div class="flex gap-4 text-slate-400">
+                    <a href="#" class="hover:text-white transition"><i class="ph-fill ph-twitter-logo text-2xl"></i></a>
+                    <a href="#" class="hover:text-white transition"><i class="ph-fill ph-github-logo text-2xl"></i></a>
+                </div>
+            </div>
+            
+            <div class="text-center text-slate-600 text-sm font-medium border-t border-white/5 pt-8">
+                (c) 2026 PitchCraft AI. Crafted with cutting-edge technology.
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PitchCraft AI - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.9)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            background: #020617;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif; 
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        .presentation-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        .presentation-card:hover { 
+            transform: translateY(-8px) scale(1.02); 
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.25); 
+        }
+        
+        .delete-btn { 
+            opacity: 0; 
+            transition: all 0.2s; 
+        }
+        
+        .presentation-card:hover .delete-btn { 
+            opacity: 1; 
+        }
+        
+        .mesh-bg { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            z-index: -1; 
+            background-image: 
+            radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.18) 0px, transparent 50%), 
+            radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.16) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.14) 0px, transparent 50%);
+        }
+        
+        .glass {
+            background: rgba(2, 6, 23, 0.75);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .text-opt,
+        .theme-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .text-opt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .text-opt.active {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .theme-card.active {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+            transform: scale(1.03);
+        }
+
+        .ai-model-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: linear-gradient(135deg, #080808 0%, #171717 55%, #22170a 100%) !important;
+            color: #facc15 !important;
+            border-color: rgba(250, 204, 21, 0.8) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 24px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(250, 204, 21, 0.12);
+            text-shadow: 0 0 12px rgba(250, 204, 21, 0.18);
+        }
+
+        .ai-model-select:focus {
+            border-color: #facc15 !important;
+            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.16), 0 12px 30px rgba(0, 0, 0, 0.32) !important;
+        }
+
+        .ai-model-select option {
+            background: #121212;
+            color: #facc15;
+            font-weight: 700;
+        }
+
+        .ai-model-shell {
+            position: relative;
+        }
+
+        .ai-model-shell::after {
+            content: "";
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            width: 0.7rem;
+            height: 0.7rem;
+            border-right: 3px solid #facc15;
+            border-bottom: 3px solid #facc15;
+            transform: translateY(-65%) rotate(45deg);
+            pointer-events: none;
+            filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.35));
+        }
+
+        /* NEW STYLES FOR IMAGE SOURCE */
+        .image-source-option {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .image-source-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-source-option.active {
+            border-color: var(--accent-color, #6366f1);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #334155, #1f2937);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #475569, #334155);
+        }
+
+        .dark-dashboard .bg-white,
+        .dark-dashboard .bg-white\/80,
+        .dark-dashboard .bg-slate-50,
+        .dark-dashboard .bg-slate-100 {
+            background-color: rgba(15, 23, 42, 0.75) !important;
+        }
+
+        .dark-dashboard .border-slate-200,
+        .dark-dashboard .border-slate-100,
+        .dark-dashboard .border-white\/50,
+        .dark-dashboard .border-white\/60 {
+            border-color: rgba(148, 163, 184, 0.25) !important;
+        }
+
+        .dark-dashboard .text-slate-400,
+        .dark-dashboard .text-slate-500,
+        .dark-dashboard .text-slate-600 {
+            color: #94a3b8 !important;
+        }
+
+        .dark-dashboard .text-slate-700,
+        .dark-dashboard .text-slate-800,
+        .dark-dashboard .text-slate-900 {
+            color: #e2e8f0 !important;
+        }
+
+        .dark-dashboard .presentation-card {
+            background: #0b1220 !important;
+            border-color: #1f2937 !important;
+            box-shadow: 0 20px 40px -16px rgba(15, 23, 42, 0.6) !important;
+        }
+
+        .dark-dashboard .presentation-card .card-preview {
+            background: linear-gradient(135deg, #0f172a 0%, #0b1220 60%, #0a0f1d 100%) !important;
+        }
+
+        .dark-dashboard .presentation-card .card-body {
+            background: #0b1220 !important;
+        }
+
+        .dark-dashboard .presentation-card .card-title {
+            color: #e2e8f0 !important;
+        }
+
+        .dark-dashboard .presentation-card .card-chip {
+            background: rgba(99, 102, 241, 0.15) !important;
+            color: #c7d2fe !important;
+            border-color: #334155 !important;
+        }
+
+        .dark-dashboard .presentation-card .card-chip-theme {
+            background: rgba(168, 85, 247, 0.15) !important;
+            color: #e9d5ff !important;
+            border-color: #334155 !important;
+        }
+
+        .dark-dashboard .presentation-card .card-meta {
+            color: #94a3b8 !important;
+            border-color: #1f2937 !important;
+        }
+
+        .dark-dashboard .presentation-card .delete-btn,
+        .dark-dashboard .presentation-card .download-btn {
+            background: rgba(15, 23, 42, 0.95) !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+
+        .dark-dashboard .download-dropdown {
+            background: #0b1220 !important;
+            border-color: #334155 !important;
+            box-shadow: 0 24px 40px -16px rgba(2, 6, 23, 0.7) !important;
+        }
+
+        .dark-dashboard .download-item:hover {
+            background: rgba(51, 65, 85, 0.5) !important;
+        }
+
+        .dark-dashboard .download-title {
+            color: #e2e8f0 !important;
+        }
+
+        .dark-dashboard .download-subtitle {
+            color: #94a3b8 !important;
+        }
+
+        .confirm-overlay {
+            background: radial-gradient(circle at top, rgba(2, 6, 23, 0.92), rgba(2, 6, 23, 0.98));
+        }
+
+        .confirm-panel {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(2, 6, 23, 0.98) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 30px 60px -30px rgba(2, 6, 23, 0.8);
+        }
+
+        .confirm-gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 45%, #d97706 100%);
+            color: #0b1220;
+        }
+
+        .confirm-input {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            color: #e2e8f0;
+        }
+
+        .confirm-input:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25);
+            outline: none;
+        }
+
+        .side-chat-toggle {
+            position: fixed;
+            right: 18px;
+            bottom: 20px;
+            z-index: 110;
+            border: 1px solid rgba(129, 140, 248, 0.45);
+            background: linear-gradient(135deg, #312e81 0%, #4c1d95 55%, #9d174d 100%);
+            color: #ffffff;
+            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.45);
+        }
+
+        .side-chat-panel {
+            position: fixed;
+            right: 18px;
+            top: 88px;
+            width: min(420px, calc(100vw - 24px));
+            height: min(680px, calc(100vh - 112px));
+            z-index: 111;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            border-radius: 20px;
+            background: linear-gradient(180deg, #0b1220 0%, #0f172a 45%, #111827 100%);
+            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.35);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.15));
+            color: #f8fafc;
+            font-weight: 800;
+            font-size: 17px;
+        }
+
+        .side-chat-content {
+            flex: 1;
+            overflow: auto;
+            padding: 16px;
+            color: #e2e8f0;
+            font-size: 18px;
+            line-height: 1.45;
+        }
+
+        .side-chat-hint {
+            margin-top: 18px;
+            font-size: 16px;
+            color: #cbd5e1;
+        }
+
+        .side-chat-chips {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .side-chat-chip {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(30, 41, 59, 0.85);
+            color: #e2e8f0;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .side-chat-chip:hover {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.35), rgba(147, 51, 234, 0.3));
+            border-color: rgba(129, 140, 248, 0.65);
+            color: #ffffff;
+        }
+
+        .side-chat-reply {
+            margin-top: 14px;
+            min-height: 150px;
+            max-height: 240px;
+            overflow: auto;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+            padding: 12px;
+            font-size: 15px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .side-chat-footer {
+            border-top: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(2, 6, 23, 0.55);
+            padding: 12px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .side-chat-input {
+            width: 100%;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.9);
+            color: #f8fafc;
+            padding: 12px 14px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .side-chat-input:focus {
+            border-color: rgba(129, 140, 248, 0.9);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.24);
+        }
+
+        .side-chat-ask {
+            border: 1px solid rgba(129, 140, 248, 0.45);
+            background: linear-gradient(135deg, #4f46e5 0%, #7e22ce 55%, #db2777 100%);
+            color: #ffffff;
+            border-radius: 999px;
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .side-chat-ask:hover {
+            filter: brightness(1.08);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 640px) {
+            .side-chat-toggle {
+                right: 14px;
+                bottom: 14px;
+            }
+
+            .side-chat-panel {
+                right: 12px;
+                top: 72px;
+                width: calc(100vw - 24px);
+                height: calc(100vh - 92px);
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-100 dark-dashboard">
+
+    <div class="mesh-bg"></div>
+
+    <div class="min-h-screen flex flex-col">
+        
+        <nav class="glass shadow-xl border-b border-white/50 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    
+                    <div class="flex items-center space-x-3">
+                        <div class="w-11 h-11 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center text-white font-black shadow-2xl shadow-indigo-500/40 text-xl">
+                            G
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 tracking-tight">PitchCraft AI</h1>
+                            <p class="text-xs text-slate-500 font-semibold">AI Design Studio</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- User Welcome Message ⭐ -->
+                        <div class="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl mr-2">
+                            <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                <span id="user-initial">U</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-1">Active User</span>
+                                <span id="user-name-display" class="text-sm font-black text-slate-700 leading-none">Loading...</span>
+                            </div>
+                        </div>
+
+                        <div class="hidden lg:flex items-center gap-3 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl mr-2">
+                            <div class="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                <i class="ph-fill ph-coins"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-1">Daily Tokens</span>
+                                <span class="text-sm font-black text-amber-700 leading-none"><span id="nav-remaining-tokens">400</span> left</span>
+                            </div>
+                        </div>
+
+                        <button onclick="deleteAllPresentations()" 
+                                id="delete-all-btn"
+                                class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-bold hover:shadow-2xl hover:shadow-red-500/40 flex items-center gap-2 transition transform hover:scale-105 active:scale-95 hidden">
+                            <i class="ph-bold ph-trash text-lg"></i> 
+                            <span class="hidden sm:inline">Delete All</span>
+                        </button>
+                        <button onclick="openCreateModal()" 
+                                class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:shadow-2xl hover:shadow-indigo-500/40 flex items-center gap-2 transition transform hover:scale-105 active:scale-95">
+                            <i class="ph-bold ph-plus text-lg"></i> 
+                            <span class="hidden sm:inline">New Presentation</span>
+                        </button>
+                        <button onclick="logout()" 
+                                class="p-3 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition transform hover:scale-110">
+                            <i class="ph-bold ph-sign-out text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 gap-6 animate-fade-in">
+                <div>
+                    <h2 class="text-4xl font-black text-slate-900 mb-2">Welcome back, <span id="user-header-name" class="text-indigo-600">User</span>!</h2>
+                    <p class="text-lg text-slate-600 font-medium">Manage and organize your AI-generated decks</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <div class="glass px-6 py-3 rounded-xl border border-indigo-200/50 shadow-lg">
+                        <div class="flex items-center gap-2">
+                            <i class="ph-duotone ph-briefcase text-indigo-600 text-2xl"></i>
+                            <div>
+                                <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Total Projects</p>
+                                <p class="text-2xl font-black text-indigo-600"><span id="presentation-count">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass px-6 py-3 rounded-xl border border-amber-200/40 shadow-lg">
+                        <div class="flex items-center gap-6 flex-wrap">
+                            <div>
+                                <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Used Today</p>
+                                <p class="text-2xl font-black text-rose-400"><span id="dashboard-used-tokens">0</span></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Remaining</p>
+                                <p class="text-2xl font-black text-emerald-400"><span id="dashboard-remaining-tokens">400</span></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Cost</p>
+                                <p class="text-sm font-black text-slate-300">5 tokens / slide</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="presentations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div class="col-span-full text-center py-40" id="loading-state">
+                    <div class="inline-block animate-spin w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full mb-6"></div>
+                    <p class="text-slate-500 font-bold text-lg">Loading your workspace...</p>
+                </div>
+            </div>
+
+            <div id="empty-state" class="hidden text-center py-40 animate-scale-in">
+                <div class="w-32 h-32 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+                    <i class="ph-duotone ph-slideshow text-6xl text-indigo-600"></i>
+                </div>
+                <h3 class="text-3xl font-black text-slate-900 mb-3">No presentations yet</h3>
+                <p class="text-lg text-slate-600 mb-10 max-w-md mx-auto">Generate your first professional deck in seconds using our advanced AI technology</p>
+                <button onclick="openCreateModal()" 
+                        class="px-10 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black text-lg hover:shadow-2xl hover:shadow-indigo-500/40 transition transform hover:scale-105 active:scale-95">
+                    <i class="ph-fill ph-sparkle mr-2"></i> Create Presentation
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <div id="create-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-lg z-50 hidden items-start justify-center p-4 overflow-y-auto">
+        <div class="relative w-full max-w-5xl glass rounded-3xl shadow-2xl p-10 space-y-8 mt-6 max-h-[90vh] overflow-y-auto overscroll-contain animate-scale-in">
+            
+            <div class="flex justify-between items-center pb-6 border-b border-slate-200/60">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900">Create with AI</h2>
+                    <p class="text-slate-600 font-semibold mt-1">Generate stunning presentations instantly</p>
+                </div>
+                <button onclick="closeCreateModal()" class="text-slate-400 hover:text-slate-600 transition hover:rotate-90 transform duration-300">
+                    <i class="ph-bold ph-x text-2xl"></i>
+                </button>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-black uppercase text-slate-700 mb-3 tracking-wider flex items-center gap-2">
+                    <i class="ph-duotone ph-chat-circle-text text-indigo-600"></i>
+                    Topic or Prompt
+                </label>
+                <textarea id="topic" 
+                          rows="3" 
+                          class="w-full p-5 border-2 border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 text-lg transition-all placeholder:text-slate-400 font-medium bg-white text-slate-900 caret-slate-900" 
+                          placeholder="e.g., Smart Resume Analyzer: Revolutionising Job Applications with AI"></textarea>
+            </div>
+
+            <div class="pt-2 border-t-2 border-slate-100">
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="toggleOutline()">
+                    <input type="checkbox" id="use_custom_outline" class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer">
+                    <label class="text-sm font-black text-slate-700 select-none cursor-pointer flex items-center gap-2 group-hover:text-indigo-600 transition">
+                        <i class="ph-duotone ph-list-bullets text-indigo-600 text-xl"></i>
+                        ✨ I have my own slide structure (Custom Outline)
+                    </label>
+                </div>
+                
+                <div id="outline-box" class="hidden mt-6 space-y-4 animate-slide-up">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="block text-sm font-black uppercase text-slate-700 tracking-wider flex items-center gap-2">
+                            <i class="ph-fill ph-notebook text-indigo-600"></i>
+                            Your Custom Outline
+                        </label>
+                        <button type="button" onclick="addOutlineCard()" 
+                                class="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 hover:from-indigo-200 hover:to-purple-200 text-indigo-700 text-sm font-bold rounded-xl transition flex items-center gap-2 border-2 border-indigo-200 shadow-sm hover:shadow-md transform hover:scale-105">
+                            <i class="ph-bold ph-plus text-lg"></i> Add Slide
+                        </button>
+                    </div>
+                    
+                    <div id="outline-cards-container" class="space-y-3 max-h-80 overflow-y-auto border-2 border-indigo-100 rounded-2xl p-4 bg-gradient-to-br from-indigo-50/50 to-purple-50/50"></div>
+                    
+                    <div class="flex items-start gap-3 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                        <i class="ph-fill ph-info text-blue-600 text-xl mt-0.5 flex-shrink-0"></i>
+                        <div class="text-sm text-blue-700 font-semibold">
+                            <strong>💡 Tip:</strong> Each card represents one slide. AI will generate detailed content based on your titles. You can add up to 20 slides.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="slide-count-section" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div id="slides-count-only">
+                    <label class="block text-sm font-black uppercase text-slate-700 mb-3 tracking-wider">Slides Count</label>
+                    <input type="number" id="slides_count" value="8" min="3" max="20" 
+                           class="w-full text-center text-3xl font-black text-indigo-600 bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-xl py-4 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-black uppercase text-slate-700 mb-3 tracking-wider">AI Model</label>
+                    <div class="ai-model-shell">
+                        <select id="ai_model" 
+                                class="ai-model-select w-full p-4 pr-12 border-2 rounded-xl outline-none font-bold cursor-pointer">
+                            <option value="gemini" selected>🧠 Gemini 3.0</option>
+                            <option value="chatgpt">✨ ChatGPT 5.3</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-black uppercase text-slate-700 mb-3 tracking-wider flex items-center gap-2">
+                    <i class="ph-duotone ph-text-align-left text-indigo-600"></i>
+                    Text Amount
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button onclick="selectTextAmount('minimal', this)" class="text-opt p-5 rounded-xl border-2 border-slate-200 hover:border-indigo-300 transition-all flex flex-col items-center gap-3">
+                        <div class="space-y-1.5 w-14 opacity-40">
+                            <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                            <div class="h-1 w-2/3 bg-slate-800 rounded-full"></div>
+                        </div>
+                        <span class="font-bold text-sm text-slate-600">Minimal</span>
+                    </button>
+
+                    <button onclick="selectTextAmount('concise', this)" class="text-opt active p-5 rounded-xl border-2 border-indigo-600 transition-all flex flex-col items-center gap-3">
+                        <div class="space-y-1.5 w-14 text-indigo-600">
+                            <div class="h-1.5 w-full bg-current rounded-full"></div>
+                            <div class="h-1.5 w-full bg-current rounded-full"></div>
+                            <div class="h-1.5 w-3/4 bg-current rounded-full"></div>
+                        </div>
+                        <span class="font-black text-sm text-indigo-700">Concise</span>
+                    </button>
+
+                    <button onclick="selectTextAmount('detailed', this)" class="text-opt p-5 rounded-xl border-2 border-slate-200 hover:border-indigo-300 transition-all flex flex-col items-center gap-3">
+                        <div class="flex gap-1.5 w-16 opacity-40">
+                            <div class="flex-1 space-y-1.5">
+                                <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                                <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                            </div>
+                            <div class="flex-1 space-y-1.5">
+                                <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                            </div>
+                        </div>
+                        <span class="font-bold text-sm text-slate-600">Detailed</span>
+                    </button>
+
+                    <button onclick="selectTextAmount('extensive', this)" class="text-opt p-5 rounded-xl border-2 border-slate-200 hover:border-indigo-300 transition-all flex flex-col items-center gap-3">
+                        <div class="flex gap-1.5 w-18 opacity-40">
+                            <div class="flex-1 space-y-1.5">
+                                <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                                <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                                <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                            </div>
+                            <div class="flex-1 space-y-1.5">
+                                <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                                <div class="h-1 w-full bg-slate-800 rounded-full"></div>
+                            </div>
+                        </div>
+                        <span class="font-bold text-sm text-slate-600">Extensive</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t-2 border-slate-100">
+                <label class="block text-sm font-black uppercase text-slate-700 mb-3 tracking-wider flex items-center gap-2">
+                    <i class="ph-duotone ph-images text-indigo-600"></i>
+                    Image Source
+                </label>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div onclick="selectImageSource('real', this)" 
+                         class="image-source-option cursor-pointer p-5 rounded-xl border-2 border-slate-200 hover:border-green-500 transition-all flex flex-col items-center gap-3 group">
+                        <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="ph-bold ph-camera text-2xl text-green-600"></i>
+                        </div>
+                        <div class="text-center">
+                            <h4 class="font-black text-base text-slate-800 mb-1">Real Images</h4>
+                            <p class="text-xs text-slate-600">Upload from your device or gallery</p>
+                        </div>
+                        <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="ph-fill ph-check-circle text-green-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div onclick="selectImageSource('ai', this)" 
+                         class="image-source-option active cursor-pointer p-5 rounded-xl border-2 border-indigo-600 bg-gradient-to-br from-indigo-50 to-purple-50 transition-all flex flex-col items-center gap-3 group">
+                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="ph-bold ph-magic-wand text-2xl text-indigo-600"></i>
+                        </div>
+                        <div class="text-center">
+                            <h4 class="font-black text-base text-indigo-700 mb-1">AI Generated</h4>
+                            <p class="text-xs text-indigo-600">Generate with AI using prompts</p>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <i class="ph-fill ph-check-circle text-indigo-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-indigo-50 border-2 border-indigo-200 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <i class="ph-fill ph-info text-indigo-600 text-xl mt-0.5"></i>
+                        <div class="text-sm text-indigo-700 font-semibold">
+                            <strong>✨ AI Images (Recommended):</strong> Our AI will automatically generate relevant images for each slide based on content.
+                            <br>
+                            <strong>📷 Real Images:</strong> Upload your own photos for complete customization.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-black uppercase text-slate-700 mb-3 tracking-wider flex items-center gap-2">
+                    <i class="ph-duotone ph-palette text-indigo-600"></i>
+                    Choose Theme
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+
+                    <div onclick="selectTheme('daytime', this)" class="theme-card cursor-pointer rounded-xl border-2 border-slate-200 overflow-hidden shadow-lg">
+                        <div class="h-24 bg-white flex flex-col justify-center px-4">
+                            <h4 class="font-serif text-xl text-slate-900">Title</h4>
+                            <p class="text-xs text-slate-500 mt-1">Body & <span class="text-indigo-500 underline">link</span></p>
+                        </div>
+                        <div class="bg-slate-50 py-2.5 px-4 border-t flex items-center gap-2">
+                            <i class="ph-circle text-slate-300 theme-check"></i>
+                            <span class="text-xs font-bold text-slate-600 uppercase">Daytime</span>
+                        </div>
+                    </div>
+
+                    <div onclick="selectTheme('dawn', this)" class="theme-card cursor-pointer rounded-xl border-2 border-slate-200 overflow-hidden shadow-lg">
+                        <div class="h-24 bg-gradient-to-br from-amber-50 to-orange-100 flex flex-col justify-center px-4">
+                            <h4 class="font-serif text-xl text-orange-900">Title</h4>
+                            <p class="text-xs text-orange-700 mt-1">Body & <span class="underline">link</span></p>
+                        </div>
+                        <div class="bg-slate-50 py-2.5 px-4 border-t flex items-center gap-2">
+                            <i class="ph-circle text-slate-300 theme-check"></i>
+                            <span class="text-xs font-bold text-slate-600 uppercase">Dawn</span>
+                        </div>
+                    </div>
+
+                    <div onclick="selectTheme('wine', this)" class="theme-card cursor-pointer rounded-xl border-2 border-slate-200 overflow-hidden shadow-lg">
+                        <div class="h-24 bg-[#581c3c] flex flex-col justify-center px-4">
+                            <h4 class="font-serif text-xl text-[#ffdec8]">Title</h4>
+                            <p class="text-xs text-[#ffdec8]/70 mt-1">Body & <span class="underline">link</span></p>
+                        </div>
+                        <div class="bg-slate-50 py-2.5 px-4 border-t flex items-center gap-2">
+                            <i class="ph-circle text-slate-300 theme-check"></i>
+                            <span class="text-xs font-bold text-slate-600 uppercase">Wine</span>
+                        </div>
+                    </div>
+
+                    <div onclick="selectTheme('snowfall', this)" class="theme-card cursor-pointer rounded-xl border-2 border-slate-200 overflow-hidden shadow-lg">
+                        <div class="h-24 bg-sky-50 flex flex-col justify-center px-4 relative">
+                            <div class="absolute top-2 right-2 w-10 h-10 bg-blue-200 rounded-full opacity-50"></div>
+                            <h4 class="font-bold text-xl text-slate-800 relative z-10">Title</h4>
+                            <p class="text-xs text-slate-500 mt-1 relative z-10">Body & <span class="text-blue-500 underline">link</span></p>
+                        </div>
+                        <div class="bg-slate-50 py-2.5 px-4 border-t flex items-center gap-2">
+                            <i class="ph-circle text-slate-300 theme-check"></i>
+                            <span class="text-xs font-bold text-slate-600 uppercase">Snowfall</span>
+                        </div>
+                    </div>
+
+                    <div onclick="selectTheme('sunset', this)" class="theme-card active cursor-pointer rounded-xl border-2 border-indigo-600 overflow-hidden shadow-lg">
+                        <div class="h-24 bg-gradient-to-r from-amber-100 to-orange-200 flex flex-col justify-center px-4">
+                            <h4 class="font-serif text-xl text-orange-900">Title</h4>
+                            <p class="text-xs text-orange-700 mt-1">Body & <span class="underline">link</span></p>
+                        </div>
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 py-2.5 px-4 border-t-2 border-indigo-200 flex items-center gap-2">
+                            <i class="ph-fill ph-check-circle text-indigo-600 theme-check"></i>
+                            <span class="text-xs font-black text-indigo-700 uppercase">Sunset</span>
+                        </div>
+                    </div>
+
+                    <div onclick="selectTheme('midnight', this)" class="theme-card cursor-pointer rounded-xl border-2 border-slate-200 overflow-hidden shadow-lg">
+                        <div class="h-24 bg-slate-900 flex flex-col justify-center px-4">
+                            <h4 class="font-bold text-xl text-slate-100">Title</h4>
+                            <p class="text-xs text-slate-300 mt-1">Body & <span class="text-violet-300 underline">link</span></p>
+                        </div>
+                        <div class="bg-slate-50 py-2.5 px-4 border-t flex items-center gap-2">
+                            <i class="ph-circle text-slate-300 theme-check"></i>
+                            <span class="text-xs font-bold text-slate-600 uppercase">Midnight</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4">
+                <button onclick="createPresentation()" 
+                        id="btn-create" 
+                        class="w-full py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl font-black text-xl hover:shadow-2xl hover:shadow-indigo-500/50 transition transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3">
+                    <i class="ph-fill ph-sparkle text-2xl"></i> 
+                    <span>Generate Presentation</span>
+                    <i class="ph-fill ph-rocket-launch text-2xl"></i>
+                </button>
+            </div>
+            
+            <div id="status-area" class="hidden text-center space-y-5 pt-4">
+                <div class="h-3 bg-slate-100 rounded-full overflow-hidden w-full">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 w-0 transition-all duration-500"></div>
+                </div>
+                <p id="status-text" class="text-indigo-600 font-black animate-pulse text-base uppercase tracking-wide">Connecting to AI...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-all-modal" class="confirm-overlay fixed inset-0 z-[90] hidden items-center justify-center p-4">
+        <div class="confirm-panel w-full max-w-lg rounded-3xl p-8 md:p-10">
+            <div class="flex items-start gap-4">
+                <div class="confirm-gold w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg">
+                    !
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-2xl font-black text-white">Delete all presentations</h3>
+                    <p class="text-sm text-slate-400 mt-2">
+                        This will permanently remove every presentation in your account. This action cannot be undone.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <label for="delete-all-input" class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
+                    Type DELETE ALL to confirm
+                </label>
+                <input id="delete-all-input" type="text" placeholder="DELETE ALL" class="confirm-input w-full rounded-xl px-4 py-3 text-base font-semibold" />
+                <p id="delete-all-error" class="mt-3 text-sm text-red-400 hidden">Confirmation text does not match.</p>
+            </div>
+
+            <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-end">
+                <button onclick="closeDeleteAllModal()" class="px-6 py-3 rounded-xl border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition">Cancel</button>
+                <button id="delete-all-confirm-btn" onclick="confirmDeleteAll()" class="confirm-gold px-6 py-3 rounded-xl font-black shadow-lg hover:shadow-xl transition">Delete All</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-10 right-10 z-[100] flex flex-col gap-4 pointer-events-none"></div>
+
+    <button id="side-chat-toggle" type="button" onclick="toggleSideChat()" class="side-chat-toggle w-12 h-12 rounded-full flex items-center justify-center" aria-label="Open help chat">
+        <i class="ph-fill ph-chat-circle-text text-xl"></i>
+    </button>
+
+    <div id="side-chat-panel" class="side-chat-panel hidden">
+        <div class="side-chat-header">
+            <span>Ask about this app</span>
+            <button type="button" onclick="toggleSideChat(false)" class="text-3xl leading-none">×</button>
+        </div>
+        <div class="side-chat-content">
+            <p>Hello! Ask me anything about this application. I can guide you quickly.</p>
+            <p class="side-chat-hint">Not sure what to ask? Choose something:</p>
+            <div class="side-chat-chips">
+                <button type="button" class="side-chat-chip" onclick="useQuickPrompt('How do I use this app?')">How to use this app</button>
+                <button type="button" class="side-chat-chip" onclick="useQuickPrompt('How do I edit and save presentations?')">How to edit and save</button>
+                <button type="button" class="side-chat-chip" onclick="useQuickPrompt('Give me 10 titles for AI vs Human')">10 AI vs Human titles</button>
+                <button type="button" class="side-chat-chip" onclick="useQuickPrompt('How can I change theme colors?')">How to change theme colors</button>
+            </div>
+            <div id="side-assistant-reply" class="side-chat-reply">Type your question below and press Send.</div>
+        </div>
+        <form id="side-chat-form" class="side-chat-footer">
+            <input id="side-assistant-question" type="text" class="side-chat-input" placeholder="Ask a question...">
+            <button type="submit" class="side-chat-ask" aria-label="Send question">➤</button>
+        </form>
+    </div>
+
+    <script>
+        // ============================================================
+        // GLOBAL VARIABLES
+        // ============================================================
+        let selectedTextAmount = 'concise';
+        let selectedTheme = 'sunset';
+        let selectedImageSource = 'ai'; // Default: AI Generated
+        const modal = document.getElementById('create-modal');
+        let modalScrollY = 0;
+
+        function lockBodyScroll() {
+            modalScrollY = window.scrollY || window.pageYOffset || 0;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${modalScrollY}px`;
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.width = '100%';
+        }
+
+        function unlockBodyScroll() {
+            const savedY = modalScrollY;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            window.scrollTo(0, savedY);
+        }
+        
+        // ============================================================
+        // MODAL FUNCTIONS
+        // ============================================================
+        function openCreateModal() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lockBodyScroll();
+            requestAnimationFrame(() => {
+                const topicInput = document.getElementById('topic');
+                if (topicInput) {
+                    topicInput.focus({ preventScroll: true });
+                }
+            });
+        }
+        
+        function closeCreateModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            unlockBodyScroll();
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('status-area').classList.add('hidden');
+            document.getElementById('btn-create').classList.remove('hidden');
+            document.getElementById('topic').value = '';
+            document.getElementById('slides_count').value = '8';
+            document.getElementById('use_custom_outline').checked = false;
+            document.getElementById('outline-box').classList.add('hidden');
+            document.getElementById('outline-cards-container').innerHTML = '';
+            document.getElementById('progress-bar').style.width = '0%';
+            selectedTextAmount = 'concise';
+            selectedTheme = 'sunset';
+            
+            // Reset Image Source to AI
+            selectedImageSource = 'ai';
+            const aiOption = document.querySelector('.image-source-option[onclick*="ai"]');
+            if(aiOption) selectImageSource('ai', aiOption);
+        }
+
+        // ============================================================
+        // CUSTOM OUTLINE FUNCTIONS
+        // ============================================================
+        function toggleOutline() {
+            const checkbox = document.getElementById('use_custom_outline');
+            const box = document.getElementById('outline-box');
+            const slidesCountOnly = document.getElementById('slides-count-only');
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                box.classList.remove('hidden');
+                if (slidesCountOnly) {
+                    slidesCountOnly.style.opacity = '0.5';
+                    slidesCountOnly.style.pointerEvents = 'none';
+                }
+                
+                // Auto-add 3 slides if empty
+                if (document.getElementById('outline-cards-container').children.length === 0) {
+                    addOutlineCard();
+                    addOutlineCard();
+                    addOutlineCard();
+                }
+            } else {
+                box.classList.add('hidden');
+                if (slidesCountOnly) {
+                    slidesCountOnly.style.opacity = '1';
+                    slidesCountOnly.style.pointerEvents = 'auto';
+                }
+            }
+        }
+
+        function addOutlineCard() {
+            const container = document.getElementById('outline-cards-container');
+            const currentCount = container.children.length;
+            
+            if (currentCount >= 20) {
+                showToast("⚠️ Maximum 20 slides allowed", "error");
+                return;
+            }
+            
+            const cardIndex = currentCount + 1;
+            
+            const card = document.createElement('div');
+            card.className = 'flex items-center gap-3 bg-white border-2 border-indigo-200 rounded-xl p-4 hover:border-indigo-400 hover:shadow-lg transition group animate-scale-in';
+            card.innerHTML = `
+                <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-black shadow-lg">
+                    ${cardIndex}
+                </div>
+                <input type="text" 
+                       class="flex-1 outline-none text-base font-semibold text-slate-800 placeholder:text-slate-400 bg-transparent"
+                       placeholder="Slide ${cardIndex} title (e.g., Why Resumes Still Matter — And Why They Fail)">
+                <button type="button" 
+                        onclick="removeOutlineCard(this)" 
+                        class="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-50 text-red-500 rounded-lg transition transform hover:scale-110">
+                    <i class="ph-bold ph-trash text-lg"></i>
+                </button>
+            `;
+            container.appendChild(card);
+            card.querySelector('input').focus();
+        }
+
+        function removeOutlineCard(button) {
+            button.closest('div').remove();
+            updateOutlineCardNumbers();
+        }
+
+        function updateOutlineCardNumbers() {
+            const cards = document.getElementById('outline-cards-container').children;
+            Array.from(cards).forEach((card, idx) => {
+                card.querySelector('.flex-shrink-0').textContent = idx + 1;
+                card.querySelector('input').placeholder = `Slide ${idx + 1} title (e.g., Core Features of Leading Smart Resume Analyzers)`;
+            });
+        }
+
+        function getOutlineText() {
+            const cards = document.getElementById('outline-cards-container').children;
+            return Array.from(cards)
+                .map(card => card.querySelector('input').value.trim())
+                .filter(text => text.length > 0)
+                .join('\n');
+        }
+
+        // ============================================================
+        // SELECTION FUNCTIONS
+        // ============================================================
+        
+        // --- IMAGE SOURCE FUNCTION ---
+        function selectImageSource(source, element) {
+            selectedImageSource = source;
+            
+            // Update active state
+            document.querySelectorAll('.image-source-option').forEach(el => {
+                el.classList.remove('active', 'border-indigo-600', 'bg-gradient-to-br', 'from-indigo-50', 'to-purple-50');
+                el.classList.add('border-slate-200');
+                el.querySelector('h4').classList.remove('text-indigo-700');
+                el.querySelector('h4').classList.add('text-slate-800');
+                el.querySelector('p').classList.remove('text-indigo-600');
+                el.querySelector('p').classList.add('text-slate-600');
+                const icon = el.querySelector('.ph-check-circle');
+                if (icon) icon.classList.add('opacity-0');
+            });
+            
+            // Set active element
+            element.classList.add('active', 'border-indigo-600', 'bg-gradient-to-br', 'from-indigo-50', 'to-purple-50');
+            element.classList.remove('border-slate-200');
+            element.querySelector('h4').classList.add('text-indigo-700');
+            element.querySelector('h4').classList.remove('text-slate-800');
+            element.querySelector('p').classList.add('text-indigo-600');
+            element.querySelector('p').classList.remove('text-slate-600');
+            const icon = element.querySelector('.ph-check-circle');
+            if (icon) icon.classList.remove('opacity-0');
+            
+            console.log("Selected image source:", selectedImageSource);
+        }
+
+        function selectTextAmount(amount, element) {
+            selectedTextAmount = amount;
+            
+            document.querySelectorAll('.text-opt').forEach(el => {
+                el.classList.remove('active', 'border-indigo-600', 'bg-gradient-to-br', 'from-indigo-50', 'to-purple-50');
+                el.classList.add('border-slate-200');
+                const bars = el.querySelectorAll('div > div');
+                bars.forEach(b => {
+                    b.classList.remove('bg-current');
+                    b.classList.add('bg-slate-800');
+                });
+                el.querySelector('span').classList.remove('text-indigo-700', 'font-black');
+                el.querySelector('span').classList.add('text-slate-600', 'font-bold');
+                const container = el.querySelector('div');
+                container.classList.add('opacity-40');
+            });
+            
+            element.classList.add('active', 'border-indigo-600', 'bg-gradient-to-br', 'from-indigo-50', 'to-purple-50');
+            element.classList.remove('border-slate-200');
+            const activeBars = element.querySelectorAll('div > div');
+            activeBars.forEach(b => {
+                b.classList.add('bg-current');
+                b.classList.remove('bg-slate-800');
+            });
+            element.querySelector('span').classList.add('text-indigo-700', 'font-black');
+            element.querySelector('span').classList.remove('text-slate-600', 'font-bold');
+            element.querySelector('div').classList.remove('opacity-40');
+        }
+
+        function selectTheme(theme, element) {
+            selectedTheme = theme;
+            
+            document.querySelectorAll('.theme-card').forEach(el => {
+                el.classList.remove('active', 'border-indigo-600');
+                el.classList.add('border-slate-200');
+                const icon = el.querySelector('.theme-check');
+                icon.className = 'ph-circle text-slate-300 theme-check';
+            });
+            
+            element.classList.add('active', 'border-indigo-600');
+            element.classList.remove('border-slate-200');
+            const icon = element.querySelector('.theme-check');
+            icon.className = 'ph-fill ph-check-circle text-indigo-600 theme-check';
+        }
+
+        function getEnvironmentTitles() {
+            return [
+                'Climate Change and Global Warming',
+                'Renewable Energy for a Sustainable Future',
+                'Water Conservation in Urban Areas',
+                'Air Pollution: Causes and Solutions',
+                'Biodiversity and Wildlife Protection',
+                'Plastic Waste Management Strategies',
+                'Sustainable Agriculture and Soil Health',
+                'Green Buildings and Eco-friendly Cities',
+                'Forest Conservation and Reforestation',
+                'Circular Economy and Zero Waste'
+            ];
+        }
+
+        async function askQuickHelp() {
+            const input = document.getElementById('side-assistant-question');
+            const reply = document.getElementById('side-assistant-reply');
+            if (!input || !reply) return;
+
+            const qRaw = (input.value || '').trim();
+            const q = qRaw.toLowerCase();
+            if (!q) {
+                reply.textContent = 'Please type your question first.';
+                return;
+            }
+
+            const aiModel = (document.getElementById('ai_model')?.value || 'gemini').trim();
+            const token = localStorage.getItem('token') || '';
+            const sendBtn = document.querySelector('#side-chat-form .side-chat-ask');
+
+            try {
+                if (sendBtn) sendBtn.disabled = true;
+                reply.textContent = 'Thinking...';
+
+                const response = await fetch('/api/presentations/assistant-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({ question: qRaw, ai_model: aiModel })
+                });
+
+                const data = await response.json().catch(() => ({}));
+                if (response.ok && data.success && data.answer) {
+                    reply.textContent = data.answer;
+                    input.value = '';
+                    return;
+                }
+            } catch (error) {
+                console.error('Assistant API error:', error);
+            } finally {
+                if (sendBtn) sendBtn.disabled = false;
+            }
+
+            if ((q.includes('ai') && q.includes('human')) || q.includes('ai vs human')) {
+                reply.textContent = [
+                    '1. AI vs Human Intelligence: Who Leads the Future?',
+                    '2. Artificial Intelligence vs Human Creativity',
+                    '3. AI and Humans: Competition or Collaboration?',
+                    '4. Human Judgment vs Algorithmic Decisions',
+                    '5. AI Speed vs Human Empathy',
+                    '6. The Future of Work: AI with Human Skills',
+                    '7. AI vs Human Learning: Key Differences',
+                    '8. Can AI Replace Human Thinking?',
+                    '9. Human Values in an AI-Driven World',
+                    '10. Building the Perfect AI-Human Partnership'
+                ].join('\n');
+                input.value = '';
+                return;
+            }
+
+            const wantsDetails = q.includes('detail') || q.includes('details') || q.includes('detailed') || q.includes('in detail') || q.includes('explain');
+            if ((q.includes('title') || q.includes('titles') || q.includes('outline') || q.includes('outlines') || q.includes('topic')) && !wantsDetails) {
+                if (q.includes('world war')) {
+                    reply.textContent = [
+                        '1. Origins of World War II',
+                        '2. Axis and Allied Powers',
+                        '3. Major Battles and Turning Points',
+                        '4. The Holocaust and Civilian Losses',
+                        '5. End of War and Global Legacy',
+                        '6. Technology and Warfare Innovation',
+                        '7. Role of Propaganda and Media',
+                        '8. Women in Wartime Economies',
+                        '9. Post-war Reconstruction',
+                        '10. Lessons for the Modern World'
+                    ].join('\n');
+                    input.value = '';
+                    return;
+                }
+            }
+
+            if ((q.includes('10 title') || q.includes('titles')) && (q.includes('environment') || q.includes('environ') || q.includes('env'))) {
+                const titles = getEnvironmentTitles();
+                reply.textContent = titles.map((t, i) => `${i + 1}. ${t}`).join('\n');
+                input.value = '';
+                return;
+            }
+
+            if (q.includes('how to use') || q.includes('use app') || q.includes('application')) {
+                reply.textContent = 'How to use:\n1. Enter your topic or prompt.\n2. Set slide count.\n3. Choose AI model.\n4. Select text amount and image source.\n5. Pick a theme.\n6. Click Generate Presentation.';
+                input.value = '';
+                return;
+            }
+
+            if (q.includes('color') || q.includes('theme')) {
+                reply.textContent = 'Theme color change:\nIn the Create modal, go to "Choose Theme" and click any theme card (Daytime, Dawn, Wine, Snowfall, Sunset, Midnight). The selected theme is applied instantly.';
+                input.value = '';
+                return;
+            }
+
+            if (q.includes('save') || q.includes('download') || q.includes('edit')) {
+                reply.textContent = 'Edit and save:\n1. Open your presentation from dashboard.\n2. Click Edit and make changes.\n3. Click Save/Update.\n4. Use Export/Download for final PPT.';
+                input.value = '';
+                return;
+            }
+
+            reply.textContent = `I received your question: "${input.value}"\n\nI can help with: how to use the app, theme/color change, edit/save steps, 10 environment titles, and AI vs Human title ideas.`;
+            input.value = '';
+        }
+
+        function useQuickPrompt(text) {
+            const input = document.getElementById('side-assistant-question');
+            if (!input) return;
+            input.value = text;
+            askQuickHelp();
+        }
+
+        function toggleSideChat(forceOpen) {
+            const panel = document.getElementById('side-chat-panel');
+            if (!panel) return;
+
+            const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : panel.classList.contains('hidden');
+            panel.classList.toggle('hidden', !shouldOpen);
+
+            if (shouldOpen) {
+                const input = document.getElementById('side-assistant-question');
+                if (input) input.focus();
+            }
+        }
+
+        // ============================================================
+        // PAGE INITIALIZATION
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 Dashboard loaded");
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const chatForm = document.getElementById('side-chat-form');
+            if (chatForm) {
+                chatForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    askQuickHelp();
+                });
+            }
+
+            toggleSideChat(true);
+
+            // ⭐ DISPLAY USER NAME
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const name = user.name || "Guest";
+                    document.getElementById('user-name-display').textContent = name;
+                    document.getElementById('user-initial').textContent = name.charAt(0).toUpperCase();
+                    document.getElementById('user-header-name').textContent = name;
+                } catch (e) {
+                    console.error("❌ User parse error:", e);
+                }
+            }
+
+            loadQuotaSummary();
+            loadPresentations();
+        });
+
+        async function loadQuotaSummary() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/presentations/quota', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Could not load quota');
+                }
+
+                const quota = data.quota || {};
+                const remaining = quota.tokens_remaining ?? 0;
+                const used = quota.tokens_used ?? 0;
+
+                const navRemaining = document.getElementById('nav-remaining-tokens');
+                const dashboardRemaining = document.getElementById('dashboard-remaining-tokens');
+                const dashboardUsed = document.getElementById('dashboard-used-tokens');
+
+                if (navRemaining) navRemaining.textContent = remaining;
+                if (dashboardRemaining) dashboardRemaining.textContent = remaining;
+                if (dashboardUsed) dashboardUsed.textContent = used;
+            } catch (error) {
+                console.error('❌ Dashboard quota load error:', error);
+            }
+        }
+
+        // ============================================================
+        // LOAD PRESENTATIONS
+        // ============================================================
+        async function loadPresentations() {
+            const grid = document.getElementById('presentations-grid');
+            const loadingState = document.getElementById('loading-state');
+            const emptyState = document.getElementById('empty-state');
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/presentations/', { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+
+                if (loadingState) loadingState.remove();
+
+                if (data.presentations && data.presentations.length > 0) {
+                    document.getElementById('presentation-count').textContent = data.presentations.length;
+                    emptyState.classList.add('hidden');
+                    
+                    // Show delete all button
+                    toggleDeleteAllButton(true);
+                    
+                    grid.innerHTML = data.presentations.map((p, index) => {
+                        const slideCount = p.slides_count || p.total_slides || p.slides?.length || '?';
+                        const theme = p.theme || 'dialogue';
+                        const createdDate = p.created_at 
+                            ? new Date(p.created_at).toLocaleDateString('en-US', { 
+                                month: 'short', day: 'numeric', year: 'numeric' 
+                              })
+                            : 'Recently';
+
+                        return `
+                        <div class="presentation-card card-surface bg-white rounded-2xl shadow-xl border-2 border-slate-200 overflow-hidden flex flex-col relative group cursor-pointer animate-scale-in" 
+                             style="animation-delay: ${index * 0.1}s"
+                             onclick="window.location.href='/presentations/${p.id}'">
+                            
+                            <button onclick="deletePresentation('${p.id}', event)" 
+                                    class="delete-btn absolute top-4 right-4 w-10 h-10 bg-white/95 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 shadow-xl border-2 border-red-200 z-20 transform hover:scale-110 transition">
+                                <i class="ph-bold ph-trash text-lg"></i>
+                            </button>
+                            
+                            <div class="delete-btn absolute top-4 right-16 z-20 relative inline-block">
+                                <button onclick="toggleCardDownload('${p.id}', event)" 
+                                        class="download-btn w-10 h-10 bg-white/95 rounded-full flex items-center justify-center text-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 shadow-xl border-2 border-indigo-200 transform hover:scale-110 transition">
+                                    <i class="ph-fill ph-download-simple text-lg"></i>
+                                </button>
+                                <div id="download-dropdown-${p.id}" class="download-dropdown hidden absolute right-0 mt-2 z-[99999] min-w-[14rem] bg-white rounded-xl shadow-xl border-2 border-slate-200">
+                                    <div class="p-1">
+                                        <button onclick="downloadFormat('${p.id}', 'pptx', event)" class="download-item w-full text-left px-4 py-3 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-3 transition-colors group rounded-t-lg">
+                                            <i class="ph-fill ph-file-ppt text-orange-500 text-xl group-hover:scale-110 transition-transform"></i>
+                                            <div class="flex-1">
+                                                <div class="download-title font-bold text-sm text-slate-800">PowerPoint</div>
+                                                <div class="download-subtitle text-xs text-slate-400">.pptx format</div>
+                                            </div>
+                                        </button>
+                                        <button onclick="downloadFormat('${p.id}', 'pdf', event)" class="download-item w-full text-left px-4 py-3 hover:bg-red-50 hover:text-red-600 flex items-center gap-3 transition-colors group">
+                                            <i class="ph-fill ph-file-pdf text-red-500 text-xl group-hover:scale-110 transition-transform"></i>
+                                            <div class="flex-1">
+                                                <div class="download-title font-bold text-sm text-slate-800">PDF</div>
+                                                <div class="download-subtitle text-xs text-slate-400">.pdf format</div>
+                                            </div>
+                                        </button>
+                                        <button onclick="downloadFormat('${p.id}', 'docx', event)" class="download-item w-full text-left px-4 py-3 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3 transition-colors group">
+                                            <i class="ph-fill ph-file-doc text-blue-500 text-xl group-hover:scale-110 transition-transform"></i>
+                                            <div class="flex-1">
+                                                <div class="download-title font-bold text-sm text-slate-800">Word DOCX</div>
+                                                <div class="download-subtitle text-xs text-slate-400">.docx format</div>
+                                            </div>
+                                        </button>
+                                        <button onclick="downloadFormat('${p.id}', 'doc', event)" class="download-item w-full text-left px-4 py-3 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors group rounded-b-lg">
+                                            <i class="ph-fill ph-file-doc text-blue-600 text-xl group-hover:scale-110 transition-transform"></i>
+                                            <div class="flex-1">
+                                                <div class="download-title font-bold text-sm text-slate-800">Word DOC</div>
+                                                <div class="download-subtitle text-xs text-slate-400">.doc format</div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-preview h-52 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center relative overflow-hidden">
+                                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.3) 0%, transparent 50%);"></div>
+                                <i class="ph-duotone ph-slideshow text-7xl text-indigo-400 group-hover:scale-125 transition-transform duration-500 relative z-10"></i>
+                            </div>
+
+                            <div class="card-body p-6 flex-1 flex flex-col bg-white">
+                                <h3 class="card-title font-black text-xl text-slate-900 line-clamp-2 mb-4 group-hover:text-indigo-600 transition-colors">
+                                    ${p.title || p.prompt || 'Untitled'}
+                                </h3>
+
+                                <div class="flex items-center gap-3 flex-wrap text-xs font-black text-slate-500 uppercase tracking-wider mt-auto">
+                                    <span class="card-chip bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 px-3 py-2 rounded-lg border border-indigo-200">
+                                        <i class="ph-fill ph-stack mr-1"></i> ${slideCount} Slides
+                                    </span>
+                                    <span class="card-chip card-chip-theme bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-2 rounded-lg border border-purple-200">
+                                        <i class="ph-fill ph-palette mr-1"></i> ${theme}
+                                    </span>
+                                </div>
+
+                                <div class="card-meta mt-5 pt-5 text-xs text-slate-400 font-bold border-t-2 border-slate-100 flex items-center gap-2">
+                                    <i class="ph-fill ph-calendar-blank"></i>
+                                    Created ${createdDate}
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    grid.innerHTML = ''; 
+                    emptyState.classList.remove('hidden');
+                    
+                    // Hide delete all button
+                    toggleDeleteAllButton(false);
+                }
+            } catch (error) {
+                console.error("❌ Load error:", error);
+                if (loadingState) loadingState.remove();
+                
+                // Hide delete all button on error
+                toggleDeleteAllButton(false);
+                
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-40">
+                        <div class="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                            <i class="ph-bold ph-warning text-4xl text-red-500"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-900 mb-3">Failed to Load</h3>
+                        <p class="text-slate-600 mb-6 font-semibold">${error.message}</p>
+                        <button onclick="loadPresentations()" 
+                                class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition transform hover:scale-105">
+                            <i class="ph-bold ph-arrow-clockwise mr-2"></i> Retry
+                        </button>
+                    </div>`;
+            }
+        }
+
+        // ============================================================
+        // CREATE PRESENTATION
+        // ============================================================
+        async function createPresentation() {
+            const topic = document.getElementById('topic').value.trim();
+            if (!topic) return showToast("❗ Please enter a topic", "error");
+
+            const useCustom = document.getElementById('use_custom_outline').checked;
+            const customOutlineText = useCustom ? getOutlineText() : null;
+
+            if (useCustom && (!customOutlineText || customOutlineText.trim() === '')) {
+                return showToast("❗ Please add at least one slide title", "error");
+            }
+
+            document.getElementById('btn-create').classList.add('hidden');
+            document.getElementById('status-area').classList.remove('hidden');
+            
+            let progress = 0;
+            const statusText = document.getElementById('status-text');
+            const steps = [
+                "🔍 Analyzing topic...", 
+                "🧠 Generating structure...", 
+                "🎨 Designing slides...", 
+                "✨ Finalizing..."
+            ];
+            let stepIdx = 0;
+
+            const progressInterval = setInterval(() => {
+                progress = Math.min(progress + Math.random() * 8, 95);
+                document.getElementById('progress-bar').style.width = progress + "%";
+            }, 400);
+
+            const stepInterval = setInterval(() => {
+                statusText.innerText = steps[stepIdx++ % steps.length];
+            }, 2000);
+
+            try {
+                const payload = {
+                    prompt: topic,
+                    slides_count: useCustom 
+                        ? (document.getElementById('outline-cards-container').children.length || 8)
+                        : parseInt(document.getElementById('slides_count').value, 10),
+                    ai_model: document.getElementById('ai_model').value,
+                    theme: selectedTheme,
+                    text_amount: selectedTextAmount,
+                    image_source: selectedImageSource,
+                    use_search: true,
+                    style: 'professional',
+                    custom_outline: customOutlineText,
+                    source_material: useCustom ? 'Custom Outline' : 'Automatic'
+                };
+
+                console.log("📤 Payload:", payload);
+
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/presentations/generate', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                clearInterval(progressInterval);
+                clearInterval(stepInterval);
+
+                if (response.ok && data.success) {
+                    document.getElementById('progress-bar').style.width = "100%";
+                    statusText.innerText = "✅ Done! Opening...";
+                    showToast("🎉 Created successfully!", "success");
+
+                    const presId = data.presentation_id || (data.presentation && data.presentation.id);
+                    if (presId) {
+                        setTimeout(() => window.location.href = `/presentations/${presId}`, 1000);
+                    } else {
+                        throw new Error("Presentation ID missing");
+                    }
+                } else {
+                    throw new Error(data.error || "Generation failed");
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                clearInterval(stepInterval);
+                console.error("❌ Error:", error);
+                showToast("❌ " + error.message, "error");
+                document.getElementById('btn-create').classList.remove('hidden');
+                document.getElementById('status-area').classList.add('hidden');
+            }
+        }
+
+        // ============================================================
+        // DELETE PRESENTATION
+        // ============================================================
+        async function deletePresentation(id, event) {
+            if (event) event.stopPropagation();
+            if (!confirm("🗑️ Delete this presentation permanently?")) return;
+            
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`/api/presentations/${id}`, { 
+                    method: 'DELETE', 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                
+                if (res.ok) {
+                    showToast("✅ Deleted successfully", "success");
+                    loadPresentations();
+                } else {
+                    const error = await res.json();
+                    throw new Error(error.error || "Delete failed");
+                }
+            } catch (e) {
+                console.error("❌", e);
+                showToast("❌ " + e.message, "error");
+            }
+        }
+
+        // ============================================================
+        // DOWNLOAD PRESENTATION FUNCTIONS
+        // ============================================================
+        function toggleCardDownload(id, event) {
+            if (event) event.stopPropagation();
+            console.log('📥 DOWNLOAD BUTTON CLICKED for presentation:', id);
+            
+            const dropdown = document.getElementById(`download-dropdown-${id}`);
+            
+            if (!dropdown) {
+                console.error('❌ Dropdown not found for ID:', id);
+                alert('Error: Dropdown not found! Please refresh the page.');
+                return;
+            }
+            
+            const isHidden = dropdown.classList.contains('hidden');
+            console.log('Hidden:', isHidden);
+            
+            // Close all other dropdowns
+            document.querySelectorAll('[id^="download-dropdown-"]').forEach(dd => {
+                if (dd.id !== `download-dropdown-${id}`) {
+                    dd.classList.add('hidden');
+                }
+            });
+            
+            // Toggle current dropdown
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                console.log('✅ Dropdown shown for presentation:', id);
+            } else {
+                dropdown.classList.add('hidden');
+                console.log('❌ Dropdown hidden for presentation:', id);
+            }
+            
+            // Debug: Check computed style
+            const computedStyle = window.getComputedStyle(dropdown);
+            console.log('Computed display:', computedStyle.display);
+            console.log('Computed z-index:', computedStyle.zIndex);
+        }
+        
+        function downloadFormat(id, format, event) {
+            if (event) event.stopPropagation();
+            console.log(`⬇️ Downloading presentation ${id} as ${format.toUpperCase()}`);
+            
+            // Show loading indicator
+            showToast(`📥 Preparing ${format.toUpperCase()} download...`, 'success');
+            
+            // Get token for auth
+            const token = localStorage.getItem('token');
+            
+            // Start download with token in query param
+            window.location.href = `/api/presentations/${id}/download/${format}?token=${token}`;
+            
+            // Hide dropdown
+            const dropdown = document.getElementById(`download-dropdown-${id}`);
+            if (dropdown) {
+                dropdown.classList.add('hidden');
+            }
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.delete-btn')) {
+                document.querySelectorAll('[id^="download-dropdown-"]').forEach(dd => {
+                    dd.classList.add('hidden');
+                });
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('delete-all-modal');
+            if (!modal.classList.contains('hidden') && e.target === modal) {
+                closeDeleteAllModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('delete-all-modal');
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeDeleteAllModal();
+            }
+        });
+
+        // ============================================================
+        // DELETE ALL PRESENTATIONS
+        // ============================================================
+        function deleteAllPresentations() {
+            openDeleteAllModal();
+        }
+
+        function openDeleteAllModal() {
+            const modal = document.getElementById('delete-all-modal');
+            const input = document.getElementById('delete-all-input');
+            const error = document.getElementById('delete-all-error');
+            const button = document.getElementById('delete-all-confirm-btn');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            input.value = '';
+            error.classList.add('hidden');
+            button.disabled = false;
+            button.classList.remove('opacity-60', 'cursor-not-allowed');
+            setTimeout(() => input.focus(), 50);
+        }
+
+        function closeDeleteAllModal() {
+            const modal = document.getElementById('delete-all-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function confirmDeleteAll() {
+            const input = document.getElementById('delete-all-input');
+            const error = document.getElementById('delete-all-error');
+            const button = document.getElementById('delete-all-confirm-btn');
+            const text = input.value.trim();
+
+            if (text !== 'DELETE ALL') {
+                error.classList.remove('hidden');
+                input.focus();
+                return;
+            }
+
+            error.classList.add('hidden');
+            button.disabled = true;
+            button.classList.add('opacity-60', 'cursor-not-allowed');
+
+            await performDeleteAllPresentations();
+            closeDeleteAllModal();
+        }
+
+        async function performDeleteAllPresentations() {
+            
+            // Show loading toast
+            const loadingToast = showPersistentToast("🗑️ Deleting all presentations...", "loading");
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/presentations/', { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch presentations');
+                
+                const data = await response.json();
+                const presentations = data.presentations || [];
+                
+                if (presentations.length === 0) {
+                    loadingToast.remove();
+                    showToast("ℹ️ No presentations to delete", "error");
+                    return;
+                }
+                
+                // Delete all presentations
+                let deleted = 0;
+                let failed = 0;
+                
+                for (const presentation of presentations) {
+                    try {
+                        const deleteRes = await fetch(`/api/presentations/${presentation.id}`, { 
+                            method: 'DELETE', 
+                            headers: { 'Authorization': `Bearer ${token}` } 
+                        });
+                        
+                        if (deleteRes.ok) {
+                            deleted++;
+                        } else {
+                            failed++;
+                        }
+                    } catch (e) {
+                        console.error(`Failed to delete ${presentation.id}:`, e);
+                        failed++;
+                    }
+                }
+                
+                loadingToast.remove();
+                
+                if (deleted > 0) {
+                    showToast(`✅ Deleted ${deleted} presentation${deleted > 1 ? 's' : ''} successfully!`, "success");
+                    loadPresentations(); // Reload the presentations
+                }
+                
+                if (failed > 0) {
+                    showToast(`⚠️ Failed to delete ${failed} presentation${failed > 1 ? 's' : ''}`, "error");
+                }
+                
+            } catch (error) {
+                loadingToast.remove();
+                console.error("❌ Delete all error:", error);
+                showToast("❌ Failed to delete presentations: " + error.message, "error");
+            }
+        }
+
+        // ============================================================
+        // TOGGLE DELETE ALL BUTTON VISIBILITY
+        // ============================================================
+        function toggleDeleteAllButton(show) {
+            const deleteAllBtn = document.getElementById('delete-all-btn');
+            if (deleteAllBtn) {
+                if (show) {
+                    deleteAllBtn.classList.remove('hidden');
+                } else {
+                    deleteAllBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        // ============================================================
+        // TOAST NOTIFICATION
+        // ============================================================
+        function showToast(msg, type = 'success') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-gradient-to-r from-green-500 to-emerald-500 border-green-600',
+                error: 'bg-gradient-to-r from-red-500 to-pink-500 border-red-600'
+            };
+            
+            toast.className = `flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl pointer-events-auto backdrop-blur-md border-2 ${colors[type]} text-white font-bold text-base animate-slide-up`;
+            toast.innerHTML = `
+                <i class="ph-fill ${type === 'error' ? 'ph-warning-circle' : 'ph-check-circle'} text-2xl"></i>
+                <span>${msg}</span>
+            `;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // ============================================================
+        // PERSISTENT TOAST (for loading states)
+        // ============================================================
+        function showPersistentToast(msg, type = 'loading') {
+            const toast = document.createElement('div');
+            const colors = {
+                loading: 'bg-gradient-to-r from-blue-500 to-indigo-500 border-blue-600',
+                success: 'bg-gradient-to-r from-green-500 to-emerald-500 border-green-600',
+                error: 'bg-gradient-to-r from-red-500 to-pink-500 border-red-600'
+            };
+            
+            const icon = type === 'loading' 
+                ? '<div class="inline-block animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full"></div>'
+                : `<i class="ph-fill ${type === 'error' ? 'ph-warning-circle' : 'ph-check-circle'} text-2xl"></i>`;
+            
+            toast.className = `flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl pointer-events-auto backdrop-blur-md border-2 ${colors[type]} text-white font-bold text-base animate-slide-up`;
+            toast.innerHTML = `
+                ${icon}
+                <span>${msg}</span>
+            `;
+            document.getElementById('toast-container').appendChild(toast);
+            return toast;
+        }
+
+        function logout() { 
+            localStorage.removeItem('token'); 
+            showToast("👋 Logged out successfully", "success");
+            setTimeout(() => window.location.href = '/login', 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PitchCraft AI | Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            900: '#030712',
+                            800: '#111827',
+                            700: '#1f2937'
+                        }
+                    },
+                    animation: {
+                        'glow-pulse': 'glowPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        glowPulse: {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: .5 },
+                        },
+                        slideUp: {
+                            '0%': { opacity: 0, transform: 'translateY(20px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            background-color: #030712; 
+            color: #f9fafb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg-grid-pattern {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, transparent, black, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black, transparent);
+        }
+
+        .glass-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-dark {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-dark:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+            outline: none;
+        }
+
+        .glow-button {
+            position: relative;
+        }
+        
+        .glow-button::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 9999px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .glow-button:hover::before {
+            opacity: 0.8;
+            animation: glowPulse 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-purple-500 selection:text-white">
+
+    <div class="fixed inset-0 bg-grid-pattern z-[-1] opacity-40"></div>
+    <div class="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none z-[-1]"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-purple-600/20 blur-[120px] pointer-events-none z-[-1]"></div>
+
+    <div class="w-full max-w-md px-4 animate-slide-up">
+        
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-[0_0_20px_rgba(139,92,246,0.5)] text-white font-black text-3xl font-display">
+                P
+            </div>
+            <h1 class="text-3xl font-display font-black text-white mb-2">PitchCraft AI</h1>
+            <p class="text-slate-400 text-sm font-medium">Design stunning decks in seconds</p>
+        </div>
+
+        <div class="glass-card rounded-[2rem] overflow-hidden">
+            
+            <div class="flex p-2 bg-white/5 border-b border-white/5">
+                <button id="tab-login" onclick="showTab('login')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 bg-white/10 text-white shadow-sm">
+                    Log In
+                </button>
+                <button id="tab-signup" onclick="showTab('signup')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 text-slate-400 hover:text-white">
+                    Sign Up
+                </button>
+            </div>
+
+            <div class="p-8">
+                <div id="login-form" class="block">
+                    <div id="login-message" class="hidden p-4 mb-6 rounded-xl text-sm font-bold border"></div>
+                    
+                    <form onsubmit="handleLogin(event)" class="space-y-5">
+                        <div>
+                            <label for="login-email" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
+                            <div class="relative">
+                                <i class="ph-fill ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+                                <input type="email" id="login-email" required placeholder="name@company.com" class="input-dark w-full rounded-xl py-3 pl-12 pr-4 text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="login-password" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                            <div class="relative">
+                                <i class="ph-fill ph-lock-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+                                <input type="password" id="login-password" required placeholder="••••••••" class="input-dark w-full rounded-xl py-3 pl-12 pr-4 text-sm">
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" id="login-btn" class="glow-button w-full py-4 bg-white text-dark-900 rounded-xl font-black text-base flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+                                <span id="login-btn-text">Sign In securely</span>
+                                <i id="login-btn-icon" class="ph-bold ph-arrow-right text-lg"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="signup-form" class="hidden">
+                    <div id="signup-message" class="hidden p-4 mb-6 rounded-xl text-sm font-bold border"></div>
+                    
+                    <form onsubmit="handleSignup(event)" class="space-y-5">
+                        <div>
+                            <label for="signup-name" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Full Name</label>
+                            <div class="relative">
+                                <i class="ph-fill ph-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+                                <input type="text" id="signup-name" required placeholder="John Doe" class="input-dark w-full rounded-xl py-3 pl-12 pr-4 text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="signup-email" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
+                            <div class="relative">
+                                <i class="ph-fill ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+                                <input type="email" id="signup-email" required placeholder="name@company.com" class="input-dark w-full rounded-xl py-3 pl-12 pr-4 text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="signup-password" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                            <div class="relative">
+                                <i class="ph-fill ph-lock-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+                                <input type="password" id="signup-password" required placeholder="Minimum 6 characters" class="input-dark w-full rounded-xl py-3 pl-12 pr-4 text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="signup-confirm-password" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Confirm Password</label>
+                            <div class="relative">
+                                <i class="ph-fill ph-lock-key-open absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+                                <input type="password" id="signup-confirm-password" required placeholder="Re-enter password" class="input-dark w-full rounded-xl py-3 pl-12 pr-4 text-sm">
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" id="signup-btn" class="glow-button w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-black text-base flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+                                <span id="signup-btn-text">Create Free Account</span>
+                                <i id="signup-btn-icon" class="ph-bold ph-sparkle text-lg"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6">
+            <a href="/" class="text-slate-500 hover:text-white text-sm font-medium transition-colors">Back to Homepage</a>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                
+                tabLogin.classList.add('bg-white/10', 'text-white', 'shadow-sm');
+                tabLogin.classList.remove('text-slate-400', 'hover:text-white');
+                
+                tabSignup.classList.remove('bg-white/10', 'text-white', 'shadow-sm');
+                tabSignup.classList.add('text-slate-400', 'hover:text-white');
+            } else {
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                
+                tabSignup.classList.add('bg-white/10', 'text-white', 'shadow-sm');
+                tabSignup.classList.remove('text-slate-400', 'hover:text-white');
+                
+                tabLogin.classList.remove('bg-white/10', 'text-white', 'shadow-sm');
+                tabLogin.classList.add('text-slate-400', 'hover:text-white');
+            }
+
+            document.getElementById('login-message').classList.add('hidden');
+            document.getElementById('signup-message').classList.add('hidden');
+        }
+
+        function showMessage(elementId, text, isSuccess) {
+            const msgEl = document.getElementById(elementId);
+            msgEl.textContent = text;
+            msgEl.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/50', 'text-red-400', 'bg-green-500/10', 'border-green-500/50', 'text-green-400');
+            
+            if (isSuccess) {
+                msgEl.classList.add('bg-green-500/10', 'border-green-500/50', 'text-green-400');
+            } else {
+                msgEl.classList.add('bg-red-500/10', 'border-red-500/50', 'text-red-400');
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            const btnText = document.getElementById('login-btn-text');
+            const btnIcon = document.getElementById('login-btn-icon');
+            btnText.textContent = "Authenticating...";
+            btnIcon.className = "ph-bold ph-spinner animate-spin text-lg";
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    showMessage('login-message', 'Login successful. Redirecting...', true);
+                    btnText.textContent = "Success";
+                    btnIcon.className = "ph-bold ph-check text-lg";
+
+                    setTimeout(() => window.location.href = '/dashboard', 1000);
+                } else {
+                    showMessage('login-message', 'Login failed: ' + data.error, false);
+                    btnText.textContent = "Sign In securely";
+                    btnIcon.className = "ph-bold ph-arrow-right text-lg";
+                }
+            } catch (error) {
+                showMessage('login-message', 'Connection error. Please try again.', false);
+                btnText.textContent = "Sign In securely";
+                btnIcon.className = "ph-bold ph-arrow-right text-lg";
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+            if (password.length < 6) {
+                showMessage('signup-message', 'Password must be at least 6 characters', false);
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('signup-message', 'Passwords do not match', false);
+                return;
+            }
+
+            const btnText = document.getElementById('signup-btn-text');
+            const btnIcon = document.getElementById('signup-btn-icon');
+            btnText.textContent = "Creating Account...";
+            btnIcon.className = "ph-bold ph-spinner animate-spin text-lg";
+
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    showMessage('signup-message', 'Account created. Redirecting...', true);
+                    btnText.textContent = "Welcome";
+                    btnIcon.className = "ph-bold ph-check text-lg";
+
+                    setTimeout(() => window.location.href = '/dashboard', 1000);
+                } else {
+                    showMessage('signup-message', 'Signup failed: ' + data.error, false);
+                    btnText.textContent = "Create Free Account";
+                    btnIcon.className = "ph-bold ph-sparkle text-lg";
+                }
+            } catch (error) {
+                showMessage('signup-message', 'Connection error. Please try again.', false);
+                btnText.textContent = "Create Free Account";
+                btnIcon.className = "ph-bold ph-sparkle text-lg";
+            }
+        }
+
+        if (window.location.pathname === '/signup') {
+            showTab('signup');
+        }
+    </script>
+</body>
+</html>
