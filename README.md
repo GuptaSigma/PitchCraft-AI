@@ -82,10 +82,7 @@ python-dotenv
 
 ## 📥 Installation
 
-### 1. Clone Repository
-```bash
-cd "C:\Users\POOJA GUPTA\Pictures\doc"
-```
+
 
 ### 2. Create Virtual Environment
 ```powershell
@@ -404,7 +401,7 @@ mkdir -Force static/generated
 
 ## 👨‍💻 Developer
 
-**Pooja Gupta**  
+**Sagar Gupta**  
 PitchCraft AI - Gamma AI Project
 
 ---
