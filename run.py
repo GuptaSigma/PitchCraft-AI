@@ -4,7 +4,7 @@ os.environ['GRPC_DNS_RESOLVER'] = 'native'
 
 import sys
 from dotenv import load_dotenv
-from flask import Flask # Zaroori import
+ 
 
 # LOAD ENVIRONMENT VARIABLES
 print("\n" + "="*80)
@@ -45,18 +45,11 @@ print("="*80 + "\n")
 # IMPORT AND CREATE FLASK APP
 try:
     from app import create_app
-    from app.routes.presentations import presentations_bp
-    
+
     print("🚀 Creating Flask application...")
     app = create_app()
-    if 'presentations' not in app.blueprints:
-        app.register_blueprint(presentations_bp, url_prefix='/api/presentations')
-        print("✅ Presentations Blueprint Registered manually in run.py")
-    else:
-        print("ℹ️ Presentations Blueprint already registered")
-
     print("✅ Flask app created successfully\n")
-    
+
 except ImportError as e:
     print(f"❌ Import error: {e}")
     print("\n💡 Make sure you have these folders:")
@@ -90,11 +83,14 @@ if __name__ == '__main__':
     print("\n💡 Press CTRL+C to stop the server\n")
     
     try:
+        port = int(os.getenv('PORT', '5000'))
+        debug_enabled = os.getenv('FLASK_DEBUG', '0').lower() in ('1', 'true', 'yes')
+
         app.run(
             host='0.0.0.0',
-            port=5000,
-            debug=True,
-            use_reloader=True
+            port=port,
+            debug=debug_enabled,
+            use_reloader=debug_enabled
         )
     except KeyboardInterrupt:
         print("\n\n" + "="*80)

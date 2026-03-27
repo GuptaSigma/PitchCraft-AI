@@ -226,7 +226,7 @@ class CloudAIService:
         return None
 
     # GOOGLE IMAGE - FLEXIBLE SEARCH (FIXED) ✨
-    def _fetch_google_image(self, query, start_index=1):
+    def _fetch_google_image(self, query, start_index=1, used_urls=None):
         """
         Google Custom Search with FLEXIBLE match (Quotes removed)
         start_index allows fetching different results
@@ -234,6 +234,7 @@ class CloudAIService:
         if not self.google_search_key or not self.google_cx_id:
             print("   [!] Google API keys not set")
             return None
+        used_urls = used_urls or set()
 
         print(f"   [Google] Searching: '{query[:50]}' (start={start_index})...")
 
@@ -270,10 +271,17 @@ class CloudAIService:
                 items = resp.json().get("items", [])
                 
                 if items:
-                    # Agar results mile, toh pehla return karo
-                    # (Scoring logic complex queries me fail ho sakta hai, direct link is safer here)
-                    print(f"   [OK] Found image at index {start_index}")
-                    return items[0]["link"]
+                    for item in items:
+                        link = item.get("link")
+                        if link and link not in used_urls:
+                            print(f"   [OK] Found image at index {start_index}")
+                            return link
+
+                    # If all links are duplicates, return first valid result.
+                    first_link = items[0].get("link")
+                    if first_link:
+                        print(f"   [OK] Reusing first Google image at index {start_index}")
+                        return first_link
                     
                 print("   [!] No suitable images found")
                         
@@ -292,25 +300,42 @@ class CloudAIService:
     def _fetch_real_image(self, query, slide_num=0, used_urls=None):
         """
         Smart image fetcher:
-        1. Wikipedia (free, accurate)
-        2. Pexels (free API key)
-        3. Unsplash (free, no key)
-        4. Google CSE (if keys set)
+        1. Google CSE (primary, paginated per slide)
+        2. Wikipedia (backup)
+        3. Pexels (backup)
+        4. Unsplash (backup)
         """
         used_urls = used_urls or set()
         
         print(f"\n   [Real Image] Fetching for Slide {slide_num}")
         print(f"   [Query] '{query}'")
         
-        # 1. Try Wikipedia FIRST
-        print(f"   [Primary] Trying Wikipedia...")
+        # 1. Try Google FIRST with slide-based pagination (1-10, 11-20, ...)
+        if self.google_search_key and self.google_cx_id:
+            print(f"   [Primary] Trying Google...")
+            safe_slide = max(1, int(slide_num))
+            start_index = ((safe_slide - 1) * 10) + 1
+            start_index = min(start_index, 91)
+
+            google_image = self._fetch_google_image(query, start_index, used_urls=used_urls)
+            if google_image and google_image not in used_urls:
+                return google_image
+
+            # One more page forward if first page is exhausted or duplicate.
+            next_start = min(start_index + 10, 91)
+            google_image = self._fetch_google_image(query, next_start, used_urls=used_urls)
+            if google_image and google_image not in used_urls:
+                return google_image
+
+        # 2. Try Wikipedia
+        print(f"   [Fallback 1] Trying Wikipedia...")
         wiki_image = self._fetch_wikipedia_image(query, used_urls=used_urls)
         if wiki_image:
             return wiki_image
 
-        # 2. Try Pexels (free API)
+        # 3. Try Pexels (free API)
         if self.pexels_api_key:
-            print(f"   [Fallback 1] Trying Pexels...")
+            print(f"   [Fallback 2] Trying Pexels...")
             pexels_page = max(1, (int(slide_num) % 5) + 1)
             pexels_image = self._fetch_pexels_image(query, page=pexels_page, used_urls=used_urls)
             if pexels_image and pexels_image not in used_urls:
@@ -321,24 +346,11 @@ class CloudAIService:
             if pexels_image and pexels_image not in used_urls:
                 return pexels_image
 
-        # 3. Try Unsplash (no key needed)
-        print(f"   [Fallback 2] Trying Unsplash...")
+        # 4. Try Unsplash (no key needed)
+        print(f"   [Fallback 3] Trying Unsplash...")
         unsplash_image = self._fetch_unsplash_image(query)
         if unsplash_image and unsplash_image not in used_urls:
             return unsplash_image
-
-        # 4. Try Google CSE if keys are set
-        if self.google_search_key and self.google_cx_id:
-            print(f"   [Fallback 3] Trying Google...")
-            start_index = 1 + (slide_num * 10) % 90
-            google_image = self._fetch_google_image(query, start_index)
-            if google_image and google_image not in used_urls:
-                return google_image
-
-            # One more page forward if the first Google result was already used.
-            google_image = self._fetch_google_image(query, min(start_index + 10, 91))
-            if google_image and google_image not in used_urls:
-                return google_image
 
         print(f"\n   [!] No images found for: {query}")
         return None
@@ -349,6 +361,10 @@ class CloudAIService:
         if not self.gemini_key:
             print("   [X] Gemini key not set")
             return None
+
+        timeout_seconds = max(15, int(os.getenv("GEMINI_TIMEOUT_SECONDS", "45")))
+        max_retries = max(1, int(os.getenv("GEMINI_MAX_RETRIES", "2")))
+        retry_delay = max(0.5, float(os.getenv("GEMINI_RETRY_DELAY_SECONDS", "1.5")))
 
         # Latest stable preview model for 2026
         model_name = "gemini-3-flash-preview"
@@ -364,15 +380,15 @@ class CloudAIService:
             }
         }
 
-        # Retry Loop: 3 baar koshish karega agar timeout hua toh
-        for attempt in range(3):
+        # Retry loop is configurable to balance latency vs reliability.
+        for attempt in range(max_retries):
             try:
-                print(f"   [Gemini] Calling (Attempt {attempt+1}/3)...")
+                print(f"   [Gemini] Calling (Attempt {attempt+1}/{max_retries}, timeout={timeout_seconds}s)...")
                 resp = requests.post(
                     url, 
                     params=params, 
                     json=payload, 
-                    timeout=90,  # 30 se badha kar 90 kar diya ✅
+                    timeout=timeout_seconds,
                     headers={"Content-Type": "application/json"}
                 )
 
@@ -383,15 +399,22 @@ class CloudAIService:
                     return text
                 
                 elif resp.status_code == 429:
-                    print("   [!] Rate limit hit. Sleeping 10s...")
-                    time.sleep(10)
+                    if attempt < (max_retries - 1):
+                        sleep_time = max(2, int(retry_delay * 2))
+                        print(f"   [!] Rate limit hit. Sleeping {sleep_time}s...")
+                        time.sleep(sleep_time)
+                    else:
+                        print("   [X] Rate limit hit and retries exhausted")
                 else:
                     print(f"   [X] API Error {resp.status_code}: {resp.text[:100]}")
                     break  # Agar key galat hai toh retry ka fayda nahi
 
             except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectTimeout):
-                print(f"   [!] Timeout Error. Retrying in 2s...")
-                time.sleep(2)
+                if attempt < (max_retries - 1):
+                    print(f"   [!] Timeout Error. Retrying in {retry_delay}s...")
+                    time.sleep(retry_delay)
+                else:
+                    print("   [X] Timeout and retries exhausted")
             except Exception as e:
                 print(f"   [X] Unexpected Error: {e}")
                 break
@@ -423,7 +446,7 @@ class CloudAIService:
                     "max_tokens": 4000,
                     "temperature": 0.7
                 },
-                timeout=60
+                timeout=max(10, int(os.getenv("DEEPSEEK_TIMEOUT_SECONDS", "35")))
             )
 
             if resp.status_code == 200:

@@ -625,7 +625,7 @@
                                     <span class="input-icon">
                                         <i class="ph-fill ph-user"></i>
                                     </span>
-                                    <input type="text" id="auth-name" class="input-dark with-icon" placeholder="John Doe">
+                                    <input type="text" id="auth-name" class="input-dark with-icon" placeholder="John Doe" autocomplete="off">
                                 </div>
                             </div>
 
@@ -636,7 +636,7 @@
                                     <span class="input-icon">
                                         <i class="ph-fill ph-envelope-simple"></i>
                                     </span>
-                                    <input type="email" id="auth-email" class="input-dark with-icon" placeholder="name@company.com" required>
+                                    <input type="email" id="auth-email" class="input-dark with-icon" placeholder="name@company.com" autocomplete="off" required>
                                 </div>
                             </div>
 
@@ -647,7 +647,7 @@
                                     <span class="input-icon">
                                         <i class="ph-fill ph-lock-key"></i>
                                     </span>
-                                    <input type="password" id="auth-password" class="input-dark with-icon" placeholder="••••••••" required>
+                                    <input type="password" id="auth-password" class="input-dark with-icon" placeholder="••••••••" autocomplete="off" required>
                                 </div>
                             </div>
 
@@ -944,6 +944,12 @@
 
         // ====== GOOGLE INITIALIZATION ======
         window.onload = function() {
+            // Clear the form to remove any pre-filled data
+            document.getElementById('auth-form').reset();
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
+            document.getElementById('auth-name').value = '';
+            
             if (GOOGLE_CLIENT_ID && window.google && google.accounts && google.accounts.id) {
                 google.accounts.id.initialize({
                     client_id: GOOGLE_CLIENT_ID,

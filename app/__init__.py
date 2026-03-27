@@ -39,7 +39,7 @@ def create_app():
     # Register blueprints
     with app.app_context():
         try:
-            from app.routes. main import main_bp
+            from app.routes.main import main_bp
             from app.routes.auth import auth_bp
             from app.routes.presentations import presentations_bp
             
@@ -50,12 +50,13 @@ def create_app():
             print("✅ All blueprints registered successfully")
             
             # Initialize database
-            from app.models. database import init_db
+            from app.models.database import init_db
             init_db()
             
         except Exception as e:
             print(f"❌ Blueprint registration error: {e}")
             import traceback
             traceback.print_exc()
+            raise
     
     return app
