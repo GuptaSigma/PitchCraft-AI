@@ -388,11 +388,16 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.03);
+            min-height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #google-signin-button, #google-signup-button {
             display: flex;
             justify-content: center;
+            width: 100%;
         }
 
         .google-help-text {
@@ -951,6 +956,11 @@
             document.getElementById('auth-name').value = '';
             
             if (GOOGLE_CLIENT_ID && window.google && google.accounts && google.accounts.id) {
+                const googleButtonWidth = Math.min(
+                    420,
+                    Math.max(280, (window.innerWidth || 380) - 120)
+                );
+
                 google.accounts.id.initialize({
                     client_id: GOOGLE_CLIENT_ID,
                     callback: onGoogleSuccess,
@@ -960,7 +970,14 @@
                 
                 google.accounts.id.renderButton(
                     document.getElementById('google-signin-button'),
-                    { type: 'icon', theme: 'outline', size: 'large' }
+                    {
+                        type: 'standard',
+                        theme: 'filled_blue',
+                        size: 'large',
+                        text: 'continue_with',
+                        shape: 'pill',
+                        width: googleButtonWidth
+                    }
                 );
             }
         };
