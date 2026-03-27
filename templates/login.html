@@ -616,7 +616,7 @@
                     <div id="login-message" class="message-box"></div>
 
                     <!-- UNIFIED AUTH FORM -->
-                    <form id="auth-form" onsubmit="handleAuth(event)">
+                    <form id="auth-form" onsubmit="handleAuth(event)" autocomplete="off">
                         <div class="form-group">
                             <!-- Full Name (Hidden for existing users) -->
                             <div class="input-group hidden" id="name-field-group">
@@ -953,12 +953,14 @@
             if (GOOGLE_CLIENT_ID && window.google && google.accounts && google.accounts.id) {
                 google.accounts.id.initialize({
                     client_id: GOOGLE_CLIENT_ID,
-                    callback: onGoogleSuccess
+                    callback: onGoogleSuccess,
+                    auto_select: false
                 });
+                google.accounts.id.disableAutoSelect();
                 
                 google.accounts.id.renderButton(
                     document.getElementById('google-signin-button'),
-                    { theme: 'dark', size: 'large', width: '100%' }
+                    { type: 'icon', theme: 'outline', size: 'large' }
                 );
             }
         };

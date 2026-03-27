@@ -59,17 +59,9 @@ def login():
 
 @main_bp.route('/signup')
 def signup():
-    """Signup page"""
-    try:
-        log_request("SIGNUP", "login.html")
-        # Reuse the unified auth template; frontend script auto-opens signup tab on /signup.
-        return render_template('login.html', google_client_id=os.getenv('GOOGLE_CLIENT_ID', '').strip())
-    except TemplateNotFound as e:
-        print(f"❌ Template missing: {e.name}")
-        return jsonify({"error": "Template not found", "file": e.name}), 500
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        return jsonify({"error":  str(e)}), 500
+    """Legacy signup route now redirects to login."""
+    log_request("SIGNUP")
+    return redirect(url_for('main.login'))
 
 @main_bp.route('/logout')
 def logout():
@@ -265,7 +257,7 @@ def test_dropdown():
 print("\n✅ MAIN ROUTES REGISTERED:")
 print("   🏠 GET  /                      → index.html (Login/Signup)")
 print("   🔐 GET  /login                 → login.html")
-print("   📝 GET  /signup                → signup.html")
+print("   📝 GET  /signup                → redirect to /login")
 print("   📊 GET  /dashboard             → dashboard.html")
 print("   ✨ GET  /editor                → editor.html")
 print("   🎨 GET  /create                → editor.html (alias)")
