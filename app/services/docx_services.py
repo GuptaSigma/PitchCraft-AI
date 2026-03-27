@@ -600,9 +600,21 @@ class DOCXService:
         
         title = slide_data.get("title", f"Slide {slide_num}")
         
-        # NEW: Content fallbacks for Slide 2 (Mission/Agenda)
-        content_raw = slide_data.get("content") or slide_data.get("mission") or slide_data.get("agenda") or ""
+        # Content fallbacks for hero slides so first page always gets body text when available
+        content_raw = (
+            slide_data.get("content")
+            or slide_data.get("subtitle")
+            or slide_data.get("description")
+            or slide_data.get("summary")
+            or slide_data.get("overview")
+            or slide_data.get("mission")
+            or slide_data.get("agenda")
+            or ""
+        )
         content = self._parse_content(content_raw)
+
+        if not content and slide_data.get("subtitle"):
+            content = [str(slide_data.get("subtitle"))]
         
         if image_url:
             img_stream = self._download_image(image_url, max_size=(1600, 900), cover=True)
@@ -901,7 +913,9 @@ class DOCXService:
         panel_rgb = self.current_theme['accent'] if is_light else self.current_theme['bg']
         title_color = RGBColor(255, 255, 255) if is_light else RGBColor(*self.current_theme['text'])
         text_color = RGBColor(255, 255, 255) if is_light else RGBColor(*self.current_theme['text'])
-        accent_color = RGBColor(255, 255, 255) if is_light else RGBColor(*self.current_theme['accent'])
+        accent_color = RGBColor(*self.current_theme['accent'])
+        card_bg_rgb = self.current_theme['card']
+        card_text_color = self._get_readable_text_color(card_bg_rgb)
         
         self._add_table_cell_color(right_cell, panel_rgb)
         
@@ -937,6 +951,7 @@ class DOCXService:
             r = 0 if i < 2 else 1
             c = i if i < 2 else 0
             cell = card_table.cell(r, c)
+            self._add_table_cell_color(cell, card_bg_rgb)
             
             # Number Label
             num_p = cell.add_paragraph()
@@ -949,7 +964,7 @@ class DOCXService:
             text_p = cell.add_paragraph()
             text_run = text_p.add_run(point)
             text_run.font.size = Pt(10)
-            text_run.font.color.rgb = text_color
+            text_run.font.color.rgb = card_text_color
             text_p.paragraph_format.space_after = Pt(12)
     
     

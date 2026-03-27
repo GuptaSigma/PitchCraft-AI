@@ -566,8 +566,16 @@ class PPTXService:
         title_p.font.bold = True
         title_p.font.color.rgb = RGBColor(*self.current_theme['text'])
 
-        # Get Content (checking mission/agenda as fallbacks for Slide 2)
-        raw_content = slide_data.get('content') or slide_data.get('mission') or slide_data.get('agenda')
+        # Get content with broad fallbacks so first/hero slide body text does not disappear
+        raw_content = (
+            slide_data.get('content')
+            or slide_data.get('subtitle')
+            or slide_data.get('description')
+            or slide_data.get('summary')
+            or slide_data.get('overview')
+            or slide_data.get('mission')
+            or slide_data.get('agenda')
+        )
         content = self._parse_content(raw_content)
         if content:
             text = ' '.join(content) if isinstance(content, list) else str(content)

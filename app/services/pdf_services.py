@@ -566,7 +566,17 @@ class PDFService:
         text_width = canvas_obj.stringWidth(title, "Helvetica-Bold", 44)
         canvas_obj.drawString((self.page_width - text_width) / 2, self.page_height - 2 * inch, title)
 
-        content = self._parse_content(slide_data.get("content", ""))
+        content_raw = (
+            slide_data.get("content")
+            or slide_data.get("subtitle")
+            or slide_data.get("description")
+            or slide_data.get("summary")
+            or slide_data.get("overview")
+            or slide_data.get("mission")
+            or slide_data.get("agenda")
+            or ""
+        )
+        content = self._parse_content(content_raw)
         full_text = " ".join(content) if content else ""
 
         if full_text:
@@ -635,7 +645,17 @@ class PDFService:
             canvas_obj.drawString((self.page_width - text_width) / 2, title_y, line)
             title_y -= 0.7 * inch
 
-        content = self._parse_content(slide_data.get('content', ''))
+        content_raw = (
+            slide_data.get('content')
+            or slide_data.get('subtitle')
+            or slide_data.get('description')
+            or slide_data.get('summary')
+            or slide_data.get('overview')
+            or slide_data.get('mission')
+            or slide_data.get('agenda')
+            or ''
+        )
+        content = self._parse_content(content_raw)
         if content:
             text = ' '.join(content) if isinstance(content, list) else str(content)
 
