@@ -316,6 +316,7 @@ def login():
 
 
 @auth_bp.route('/google-login', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/google-callback', methods=['POST', 'OPTIONS'])
 def google_login():
     if request.method == 'OPTIONS':
         return '', 204
@@ -430,4 +431,4 @@ def logout():
     return jsonify({'success': True, 'message': 'Logged out successfully'}), 200
 
 
-print('✅ Auth routes: /config, /signup, /login, /google-login, /verify, /logout')
+print('✅ Auth routes: /config, /signup, /login, /google-login, /google-callback, /verify, /logout')
